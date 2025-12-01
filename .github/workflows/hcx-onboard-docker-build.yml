@@ -48,7 +48,7 @@ jobs:
         with:
           context: ./hcx-onboard
           push: true
-          tags: swasth2021/hcx-onboard:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/hcx-onboard:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: hcx-onboard image
 
       - name: Configure AWS CLI

@@ -32,5 +32,5 @@ jobs:
         with:
           context: ./onboarding-app
           push: true
-          tags: swasth2021/onboarding-app:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/onboarding-app:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: onboarding-app image

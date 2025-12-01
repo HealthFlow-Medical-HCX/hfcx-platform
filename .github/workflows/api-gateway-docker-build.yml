@@ -51,7 +51,7 @@ jobs:
         with:
           context: ./api-gateway
           push: true
-          tags: swasth2021/api-gateway:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/api-gateway:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: api-gateway image
 
       - name: Configure AWS CLI

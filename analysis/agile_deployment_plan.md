@@ -110,7 +110,7 @@ graph TD
 - **Sprint 3-6**: Remove India-specific code, implement Egyptian localization (phone, ID, address), and update UI/UX.
 - **Deliverables**:
   - Fully localized platform with Egyptian data formats.
-  - All Swasth/India branding removed.
+  - All HealthFlow/India branding removed.
   - Arabic language support (RTL).
 
 ### Phase 3: Production Hardening (Weeks 13-18)

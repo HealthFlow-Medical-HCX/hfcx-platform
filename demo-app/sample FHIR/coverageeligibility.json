@@ -101,7 +101,7 @@
               "display": "Subscriber Number"
             }]
           },
-          "system": "http://gicofIndia.com/beneficiaries",
+          "system": "http://gicofEgypt.com/beneficiaries",
           "value": "BEN-101"
         },
           {
@@ -159,7 +159,7 @@
           "system": "http://irdai.gov.in/insurers",
           "value": "112"
         }],
-        "name": "General Insurance Corporation of India"
+        "name": "General Insurance Corporation of Egypt"
       }
     },
     {
@@ -168,7 +168,7 @@
         "resourceType": "Coverage",
         "id": "dadde132-ad64-4d18-8c18-1d52d7e86abc",
         "identifier": [{
-          "system": "https://www.gicofIndia.in/policies",
+          "system": "https://www.gicofEgypt.in/policies",
           "value": "policy-RVH1003"
         }],
         "status": "active",

@@ -6,7 +6,7 @@
 
 ## Summary
 
-This report summarizes the automated contextualization of the HCX codebase from Swasth/India to HealthFlow/Egypt.
+This report summarizes the automated contextualization of the HCX codebase from HealthFlow/India to HealthFlow/Egypt.
 
 ## Changes Applied
 
@@ -31,12 +31,12 @@ This report summarizes the automated contextualization of the HCX codebase from 
 - **Client ID**: `swasth-hcx-gateway` → `healthflow-hcx-gateway`
 
 ### 5. Frontend Branding
-- **Application Title**: "Swasth HCX" → "HealthFlow HCX Egypt"
+- **Application Title**: "HealthFlow HCX" → "HealthFlow HCX Egypt"
 - **NPM Packages**: `swasth-*` → `healthflow-*`
 
 ### 6. Documentation
 - All Markdown files updated
-- Regulatory references updated (IRDAI → FRA, NHA/ABDM → MoHP)
+- Regulatory references updated (FRA (Financial Regulatory Authority) → FRA, MoHP (Ministry of Health and Population)/MoHP (Ministry of Health and Population) → MoHP)
 
 ### 7. LICENSE Files
 - Copyright holder updated to HealthFlow Medical

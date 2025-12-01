@@ -51,7 +51,7 @@ jobs:
         with:
           context: ./hcx-scheduler-jobs
           push: true
-          tags: swasth2021/hcx-scheduler-jobs:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/hcx-scheduler-jobs:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: hcx-scheduler-jobs image
 
       - name: Configure AWS CLI

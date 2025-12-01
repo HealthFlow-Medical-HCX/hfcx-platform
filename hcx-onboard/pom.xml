@@ -8,7 +8,7 @@
 		<version>2.5.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>org.swasth</groupId>
+	<groupId>org.healthflow</groupId>
 	<artifactId>hcx-onboard</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<properties>
@@ -33,12 +33,12 @@
 			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.swasth</groupId>
+			<groupId>org.healthflow</groupId>
 			<artifactId>hcx-common</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.swasth</groupId>
+			<groupId>org.healthflow</groupId>
 			<artifactId>audit-indexer</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
@@ -81,7 +81,7 @@
 			<version>1.12.353</version>
 		</dependency>
         <dependency>
-            <groupId>org.swasth</groupId>
+            <groupId>org.healthflow</groupId>
             <artifactId>postgresql-client</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>

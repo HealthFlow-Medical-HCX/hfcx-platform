@@ -45,7 +45,7 @@ This section provides a detailed summary of all artifacts produced during Phase 
 ### 2.3 Automation Scripts
 
 - **File**: `phase1/scripts/contextualize-codebase.sh`
-  - **Description**: An automated refactoring script to replace all Swasth/India references with HealthFlow/Egypt equivalents. It handles package renaming, API endpoint updates, Keycloak configuration, frontend branding, and documentation changes. Includes a `--dry-run` mode for safe testing.
+  - **Description**: An automated refactoring script to replace all HealthFlow/India references with HealthFlow/Egypt equivalents. It handles package renaming, API endpoint updates, Keycloak configuration, frontend branding, and documentation changes. Includes a `--dry-run` mode for safe testing.
 
 - **File**: `phase1/scripts/localize-egypt.sh`
   - **Description**: A script to generate Java classes and configurations for Egyptian localization. It creates validators for phone numbers, National IDs, and IBANs, and generates an enum for all 27 Egyptian governorates.

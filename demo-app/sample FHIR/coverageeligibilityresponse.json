@@ -48,7 +48,7 @@
         "time": "2021-12-22T14:10:14Z",
         "party": {
           "reference": "Organization/2",
-          "display": "PMJAY, MoHFW, Govt Of India"
+          "display": "PMJAY, MoHFW, Govt Of Egypt"
         }
       }],
       "section": [{
@@ -438,7 +438,7 @@
       "resource": {
         "resourceType": "Organization",
         "id": "2",
-        "name": "PMJAY, MoHFW, Govt Of India",
+        "name": "PMJAY, MoHFW, Govt Of Egypt",
         "identifier": [{
           "system": "https://hcx.org/orgs",
           "value": "PMJAY"

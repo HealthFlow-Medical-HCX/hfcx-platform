@@ -1,0 +1,40 @@
+package org.healthflow.common.service;
+
+import kong.unirest.HttpResponse;
+import kong.unirest.UnirestException;
+import org.healthflow.common.exception.ErrorCodes;
+import org.healthflow.common.exception.ServerException;
+import org.healthflow.common.utils.HttpUtils;
+import org.healthflow.common.utils.JSONUtils;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class RegistryService {
+
+    private final String registryUrl;
+
+    public RegistryService(String registryUrl){
+        this.registryUrl = registryUrl;
+    }
+
+    public List<Map<String,Object>> getDetails(String requestBody) throws Exception {
+        String url = registryUrl + "/api/v1/Organisation/search";
+        HttpResponse<String> response;
+        try {
+            response = HttpUtils.post(url, requestBody, new HashMap<>());
+        } catch (UnirestException e) {
+            throw new ServerException(ErrorCodes.ERR_SERVICE_UNAVAILABLE, "Error connecting to registry service: " + e.getMessage());
+        }
+        List<Map<String,Object>> details;
+        if (response.getStatus() == 200) {
+            details = JSONUtils.deserialize(response.getBody(), List.class);
+        } else {
+            throw new Exception("Error in fetching the participant details" + response.getStatus());
+        }
+        return details;
+    }
+
+}

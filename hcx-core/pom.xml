@@ -6,10 +6,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>hcx-platform</artifactId>
-        <groupId>org.swasth</groupId>
+        <groupId>org.healthflow</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.swasth</groupId>
+    <groupId>org.healthflow</groupId>
     <artifactId>hcx-core</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>

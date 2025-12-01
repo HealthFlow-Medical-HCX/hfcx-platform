@@ -9,14 +9,14 @@
 
 ## Executive Summary
 
-This comprehensive report provides a detailed analysis and actionable recommendations for contextualizing, localizing, and deploying the Health Claims Exchange (HCX) platform for the Egyptian healthcare market. The analysis covers twelve forked repositories from the Swasth HCX implementation, identifying **177 Swasth references** and **93 India-specific references** that require modification.
+This comprehensive report provides a detailed analysis and actionable recommendations for contextualizing, localizing, and deploying the Health Claims Exchange (HCX) platform for the Egyptian healthcare market. The analysis covers twelve forked repositories from the HealthFlow HCX implementation, identifying **177 HealthFlow references** and **93 India-specific references** that require modification.
 
 The platform requires significant enhancements across **security, scalability, reliability, and compliance** before production deployment. This report provides a structured approach to achieve production readiness through an **agile, zero-disruption deployment strategy** spanning approximately **24 weeks** with an estimated budget of **$530,000 - $725,000**.
 
 ### Key Findings
 
 **Contextualization Requirements**:
-- Remove all Swasth branding and India-specific references from documentation, code, and configuration files.
+- Remove all HealthFlow branding and India-specific references from documentation, code, and configuration files.
 - Update Java package names from `org.swasth.*` to `org.healthflow.*`.
 - Replace API endpoints (dev-hcx.swasth.app) with Egyptian equivalents.
 - Modify Keycloak realm names and authentication configurations.
@@ -73,7 +73,7 @@ The report recommends a **four-phase agile deployment strategy** with 2-week spr
 
 ### 1.1 Repository Inventory
 
-The HealthFlow Medical HCX organization contains **12 repositories** forked from the Swasth HCX implementation:
+The HealthFlow Medical HCX organization contains **12 repositories** forked from the HealthFlow HCX implementation:
 
 | Repository | Purpose | Priority | Lines of Code |
 |---|---|---|---|
@@ -129,16 +129,16 @@ The HealthFlow Medical HCX organization contains **12 repositories** forked from
 
 ## 2. Contextualization Strategy
 
-### 2.1 Swasth References (177 Occurrences)
+### 2.1 HealthFlow References (177 Occurrences)
 
 **Categories**:
-1. **Copyright Notices** (12 files): All LICENSE files contain Swasth copyright.
+1. **Copyright Notices** (12 files): All LICENSE files contain HealthFlow copyright.
 2. **Java Packages** (89 files): `org.swasth.*` package structure.
 3. **Maven Group IDs** (15 files): `<groupId>org.swasth</groupId>` in pom.xml.
 4. **API Endpoints** (23 files): References to `dev-hcx.swasth.app`, `docs.swasth.app`.
 5. **Keycloak Realms** (8 files): `swasth-health-claim-exchange` realm names.
-6. **Frontend Branding** (18 files): "Swasth HCX POC Application" titles.
-7. **Configuration** (12 files): Swasth-specific environment variables.
+6. **Frontend Branding** (18 files): "HealthFlow HCX POC Application" titles.
+7. **Configuration** (12 files): HealthFlow-specific environment variables.
 
 ### 2.2 Contextualization Action Plan
 
@@ -179,7 +179,7 @@ client-id: healthflow-hcx-gateway
 
 #### Phase 4: Frontend Branding
 
-- Update application titles from "Swasth HCX" to "HealthFlow HCX Egypt".
+- Update application titles from "HealthFlow HCX" to "HealthFlow HCX Egypt".
 - Replace logos and favicon with HealthFlow branding.
 - Update footer copyright notices.
 - Modify "About" pages and help documentation.
@@ -189,7 +189,7 @@ client-id: healthflow-hcx-gateway
 ### 2.3 India-Specific References (93 Occurrences)
 
 **Categories**:
-1. **Regulatory Bodies**: IRDAI (Insurance Regulatory and Development Authority of India), NHA (National Health Authority), ABDM (Ayushman Bharat Digital Mission).
+1. **Regulatory Bodies**: FRA (Financial Regulatory Authority) (Insurance Regulatory and Development Authority of India), MoHP (Ministry of Health and Population) (National Health Authority), MoHP (Ministry of Health and Population) (Ayushman Bharat Digital Mission).
 2. **Geographic Data**: Indian states (Telangana, Hyderabad), postal codes (500805).
 3. **Phone Numbers**: Indian format (10 digits, starting with 6-9).
 4. **Test Data**: Sample participants with Indian addresses and phone numbers.
@@ -199,8 +199,8 @@ client-id: healthflow-hcx-gateway
 
 | India Reference | Egypt Equivalent |
 |---|---|
-| **IRDAI** | FRA (Financial Regulatory Authority) |
-| **NHA / ABDM** | MoHP (Ministry of Health and Population) |
+| **FRA (Financial Regulatory Authority)** | FRA (Financial Regulatory Authority) |
+| **MoHP (Ministry of Health and Population) / MoHP (Ministry of Health and Population)** | MoHP (Ministry of Health and Population) |
 | **Indian States** | Egyptian Governorates (27 total) |
 | **Indian Postal Codes** | Egyptian Postal Codes (5 digits) |
 | **Indian Phone Format** | Egyptian Phone Format (+20 1XX XXX XXXX) |
@@ -926,7 +926,7 @@ public class ConsentService {
 
 **Sprint 2: Code Analysis & Planning**
 - Clone all repositories and analyze codebase.
-- Identify all Swasth and India references.
+- Identify all HealthFlow and India references.
 - Create detailed refactoring plan.
 - Set up code quality tools (SonarQube, ESLint).
 - Establish coding standards and branching strategy.
@@ -942,7 +942,7 @@ public class ConsentService {
 **Sprint 3: Package Renaming & Branding**
 - Rename Java packages from `org.swasth.*` to `org.healthflow.*`.
 - Update Maven group IDs and artifact IDs.
-- Replace Swasth branding with HealthFlow branding.
+- Replace HealthFlow branding with HealthFlow branding.
 - Update API endpoints and Keycloak realm names.
 
 **Sprint 4: Phone & ID Validation**
@@ -966,7 +966,7 @@ public class ConsentService {
 
 **Deliverables**:
 - ✅ Fully localized platform with Egyptian data formats.
-- ✅ All Swasth/India branding removed.
+- ✅ All HealthFlow/India branding removed.
 - ✅ Arabic language support with RTL layout.
 - ✅ Comprehensive test coverage for localization.
 
@@ -1268,7 +1268,7 @@ gantt
 
 ### Appendix A: Detailed File Analysis
 
-**Swasth References by File Type**:
+**HealthFlow References by File Type**:
 - Java files: 89 files
 - XML files (pom.xml): 15 files
 - YAML files (configuration): 23 files
@@ -1277,7 +1277,7 @@ gantt
 - LICENSE files: 12 files
 
 **India References by Category**:
-- Regulatory bodies (IRDAI, NHA, ABDM): 34 occurrences
+- Regulatory bodies (FRA (Financial Regulatory Authority), MoHP (Ministry of Health and Population), MoHP (Ministry of Health and Population)): 34 occurrences
 - Geographic data (states, cities): 28 occurrences
 - Phone numbers: 19 occurrences
 - Test data: 12 occurrences

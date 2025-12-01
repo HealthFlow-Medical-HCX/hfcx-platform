@@ -1,8 +1,8 @@
-# Swasth References Analysis - HCX Egypt Contextualization
+# HealthFlow References Analysis - HCX Egypt Contextualization
 
 ## Executive Summary
 
-This document provides a comprehensive analysis of all Swasth and India-specific references found across the HCX repositories that require contextualization for Egypt.
+This document provides a comprehensive analysis of all HealthFlow and India-specific references found across the HCX repositories that require contextualization for Egypt.
 
 ## Search Results Summary
 
@@ -14,7 +14,7 @@ This document provides a comprehensive analysis of all Swasth and India-specific
 
 ### 1. **Copyright and Licensing**
 - **Location**: LICENSE files across all repositories
-- **Current**: Copyright (c) 2024 Swasth Digital Health Foundation
+- **Current**: Copyright (c) 2024 HealthFlow Digital Health Foundation
 - **Required Change**: Copyright (c) 2025 HealthFlow Group
 
 ### 2. **Package Names and Group IDs**
@@ -55,7 +55,7 @@ This document provides a comprehensive analysis of all Swasth and India-specific
 
 ### 6. **Branding and UI References**
 - **Location**: Frontend applications
-- **Current**: "Swasth HCX POC Application"
+- **Current**: "HealthFlow HCX POC Application"
 - **Required Change**: "HealthFlow Egypt HCX Application"
 - **Files**:
   - `demo-app/client/public/index.html`
@@ -119,7 +119,7 @@ This document provides a comprehensive analysis of all Swasth and India-specific
 ### Safe Replacements (Can be automated)
 ```bash
 # Copyright notices
-find . -type f -name "*.java" -o -name "*.xml" -o -name "*.md" | xargs sed -i 's/Swasth Digital Health Foundation/HealthFlow Group/g'
+find . -type f -name "*.java" -o -name "*.xml" -o -name "*.md" | xargs sed -i 's/HealthFlow Digital Health Foundation/HealthFlow Group/g'
 
 # Package names (requires careful testing)
 find . -type f -name "*.java" | xargs sed -i 's/package org\.swasth\./package org.healthflow./g'

@@ -54,7 +54,7 @@ jobs:
         with:
           context: ./api-gateway
           push: true
-          tags: swasth2021/api-gateway:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/api-gateway:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: api-gateway image
 
       - name: Build and push Docker image for HCX-APIs
@@ -62,7 +62,7 @@ jobs:
         with:
           context: ./hcx-apis
           push: true
-          tags: swasth2021/hcx-api:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/hcx-api:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: hcx-api image
 
       - name: Build and push Docker image for HCX-Onboard
@@ -70,7 +70,7 @@ jobs:
         with:
           context: ./hcx-onboard
           push: true
-          tags: swasth2021/hcx-onboard:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/hcx-onboard:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: hcx-onboard image
 
       - name: Build and push Docker image for HCX Scheduler Jobs
@@ -78,7 +78,7 @@ jobs:
         with:
           context: ./hcx-scheduler-jobs
           push: true
-          tags: swasth2021/hcx-scheduler-jobs:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/hcx-scheduler-jobs:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: hcx-scheduler-jobs image
 
       - name: Build and push Docker image for HCX Pipeline Jobs
@@ -86,7 +86,7 @@ jobs:
         with:
           context: ./hcx-pipeline-jobs/jobs-distribution
           push: true
-          tags: swasth2021/hcx-pipeline-jobs:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          tags: healthflow/hcx-pipeline-jobs:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: hcx-pipeline-jobs image
 
       - name: Configure AWS CLI

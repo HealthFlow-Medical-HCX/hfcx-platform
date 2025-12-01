@@ -122,7 +122,7 @@
                 }
               ]
             },
-            "system": "http://gicofIndia.com/beneficiaries",
+            "system": "http://gicofEgypt.com/beneficiaries",
             "value": "BEN-101"
           },
           {
@@ -188,7 +188,7 @@
             "value": "112"
           }
         ],
-        "name": "General Insurance Corporation of India"
+        "name": "General Insurance Corporation of Egypt"
       }
     },
     {
@@ -198,7 +198,7 @@
         "id": "dadde132-ad64-4d18-8c18-1d52d7e86abc",
         "identifier": [
           {
-            "system": "https://www.gicofIndia.in/policies",
+            "system": "https://www.gicofEgypt.in/policies",
             "value": "policy-RVH1003"
           }
         ],

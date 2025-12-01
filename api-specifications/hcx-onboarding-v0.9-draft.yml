@@ -11,7 +11,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 
 servers:
-  - url: https://dev-hcx.swasth.app/0.9
+  - url: https://dev-hcx.healthflow.eg/0.9
 tags:
   - name: Applicant Onboarding APIs
     description: >-

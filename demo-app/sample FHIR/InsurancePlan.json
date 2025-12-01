@@ -34,7 +34,7 @@
   },
   "administeredBy": {
     "reference": "Organization/AB_GUJ_TPA_1",
-    "display": "MD India Healthcare Service (TPA) Pvt. Ltd."
+    "display": "MD Egypt Healthcare Service (TPA) Pvt. Ltd."
   },
   "coverageArea": [{
     "reference": "Location/GUJARAT",

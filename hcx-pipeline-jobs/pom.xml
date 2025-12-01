@@ -7,7 +7,7 @@
     <prerequisites>
         <maven>3.0.0</maven>
     </prerequisites>
-    <groupId>org.swasth</groupId>
+    <groupId>org.healthflow</groupId>
     <artifactId>pipeline-jobs</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>

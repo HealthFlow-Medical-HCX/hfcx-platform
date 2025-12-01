@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>pipeline-jobs</artifactId>
-        <groupId>org.swasth</groupId>
+        <groupId>org.healthflow</groupId>
         <version>1.0</version>
     </parent>
-    <groupId>org.swasth</groupId>
+    <groupId>org.healthflow</groupId>
     <artifactId>claims-job</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
@@ -56,7 +56,7 @@
             <version>${flink.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.swasth</groupId>
+            <groupId>org.healthflow</groupId>
             <artifactId>core</artifactId>
             <version>1.0.0</version>
         </dependency>
@@ -107,7 +107,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.swasth</groupId>
+            <groupId>org.healthflow</groupId>
             <artifactId>core</artifactId>
             <version>1.0.0</version>
             <type>test-jar</type>
@@ -205,7 +205,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.swasth.dp.claims.task.ClaimsStreamTask</mainClass>
+                                    <mainClass>org.healthflow.dp.claims.task.ClaimsStreamTask</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

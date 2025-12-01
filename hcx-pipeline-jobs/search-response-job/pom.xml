@@ -5,7 +5,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.swasth</groupId>
+        <groupId>org.healthflow</groupId>
         <artifactId>pipeline-jobs</artifactId>
         <version>1.0</version>
     </parent>
@@ -29,7 +29,7 @@
             <version>${flink.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.swasth</groupId>
+            <groupId>org.healthflow</groupId>
             <artifactId>core</artifactId>
             <version>1.0.0</version>
         </dependency>
@@ -55,7 +55,7 @@
             <version>4.8.90</version>
         </dependency>
         <dependency>
-            <groupId>org.swasth</groupId>
+            <groupId>org.healthflow</groupId>
             <artifactId>core</artifactId>
             <version>1.0.0</version>
             <type>test-jar</type>
@@ -180,7 +180,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.swasth.dp.searchresponse.task.SearchResponseStreamTask</mainClass>
+                                    <mainClass>org.healthflow.dp.searchresponse.task.SearchResponseStreamTask</mainClass>
                                 </transformer>
                                 <!-- append default configs -->
                                 <transformer

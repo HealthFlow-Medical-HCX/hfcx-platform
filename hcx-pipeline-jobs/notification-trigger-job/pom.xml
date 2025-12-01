@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>pipeline-jobs</artifactId>
-        <groupId>org.swasth</groupId>
+        <groupId>org.healthflow</groupId>
         <version>1.0</version>
     </parent>
 
-    <groupId>org.swasth</groupId>
+    <groupId>org.healthflow</groupId>
     <artifactId>notification-trigger-job</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
@@ -59,7 +59,7 @@
             <version>${flink.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.swasth</groupId>
+            <groupId>org.healthflow</groupId>
             <artifactId>core</artifactId>
             <version>1.0.0</version>
         </dependency>
@@ -108,7 +108,7 @@
             <classifier>tests</classifier>
         </dependency>
         <dependency>
-            <groupId>org.swasth</groupId>
+            <groupId>org.healthflow</groupId>
             <artifactId>core</artifactId>
             <version>1.0.0</version>
             <type>test-jar</type>
@@ -205,7 +205,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.swasth.dp.notification.trigger.task.NotificationTriggerStreamTask
+                                    <mainClass>org.healthflow.dp.notification.trigger.task.NotificationTriggerStreamTask
                                     </mainClass>
                                 </transformer>
                             </transformers>

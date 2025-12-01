@@ -12,7 +12,7 @@ This document analyzes all India-specific references found in the HCX codebase t
 
 ## India-Specific Identifiers Found
 
-### 1. **IRDAI (Insurance Regulatory and Development Authority of India)**
+### 1. **FRA (Financial Regulatory Authority) (Insurance Regulatory and Development Authority of India)**
 - **Occurrences**: Multiple references in FHIR profiles and sample data
 - **Egypt Equivalent**: FRA (Financial Regulatory Authority - الهيئة العامة للرقابة المالية)
 - **System URLs to Replace**:
@@ -20,7 +20,7 @@ This document analyzes all India-specific references found in the HCX codebase t
   - `http://irdai.gov.in/facilities` → `https://fra.gov.eg/facilities`
   - `http://irdai.gov.in/provideroffices` → `https://fra.gov.eg/provider-offices`
 
-### 2. **ABDM (Ayushman Bharat Digital Mission)**
+### 2. **MoHP (Ministry of Health and Population) (Ayushman Bharat Digital Mission)**
 - **Occurrences**: Patient and facility identifiers
 - **Egypt Equivalent**: EHDS (Egyptian Health Digital Strategy)
 - **System URLs to Replace**:
@@ -54,12 +54,12 @@ This document analyzes all India-specific references found in the HCX codebase t
 ### High Priority Files (FHIR Profiles and Sample Data)
 
 1. **demo-app/sample FHIR/claims.json**
-   - Multiple IRDAI, ABDM, GIC India references
+   - Multiple FRA (Financial Regulatory Authority), MoHP (Ministry of Health and Population), GIC India references
    - Country field: INDIA → EGYPT
    - Postal codes and addresses
 
 2. **demo-app/sample FHIR/coverageeligibility.json**
-   - IRDAI and ABDM system URLs
+   - FRA (Financial Regulatory Authority) and MoHP (Ministry of Health and Population) system URLs
    - GIC India organization references
    - Geographic data
 
@@ -72,11 +72,11 @@ This document analyzes all India-specific references found in the HCX codebase t
    - Insurer identifiers
 
 5. **demo-app/sample FHIR/communication.json**
-   - IRDAI provider and insurer identifiers
+   - FRA (Financial Regulatory Authority) provider and insurer identifiers
 
 6. **demo-app/sample FHIR/communicationrequest.json**
-   - ABDM facility identifiers
-   - IRDAI insurer references
+   - MoHP (Ministry of Health and Population) facility identifiers
+   - FRA (Financial Regulatory Authority) insurer references
 
 7. **demo-app/sample FHIR/InsurancePlan.json**
    - TPA (Third Party Administrator) references
@@ -238,14 +238,14 @@ This document analyzes all India-specific references found in the HCX codebase t
 ### Script 1: FHIR System URL Updates
 ```bash
 #!/bin/bash
-# Replace IRDAI URLs
+# Replace FRA (Financial Regulatory Authority) URLs
 find . -type f \( -name "*.json" -o -name "*.xml" \) -exec sed -i \
   's|http://irdai\.gov\.in/insurers|https://fra.gov.eg/insurers|g' {} +
 
 find . -type f \( -name "*.json" -o -name "*.xml" \) -exec sed -i \
   's|http://irdai\.gov\.in/facilities|https://fra.gov.eg/facilities|g' {} +
 
-# Replace ABDM URLs
+# Replace MoHP (Ministry of Health and Population) URLs
 find . -type f \( -name "*.json" -o -name "*.xml" \) -exec sed -i \
   's|http://abdm\.gov\.in/patients|https://mohp.gov.eg/patients|g' {} +
 
@@ -301,7 +301,7 @@ find . -type f \( -name "*.json" -o -name "*.xml" \) -exec sed -i \
 ### High Risk Areas
 1. **FHIR Profile Compatibility**: Egyptian healthcare system may have different requirements
 2. **Identifier Formats**: Egyptian ID formats differ significantly from Indian formats
-3. **Regulatory Compliance**: FRA requirements may differ from IRDAI
+3. **Regulatory Compliance**: FRA requirements may differ from FRA (Financial Regulatory Authority)
 
 ### Mitigation Strategies
 1. **Phased Rollout**: Update and test one FHIR resource type at a time
