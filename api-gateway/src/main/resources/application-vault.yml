@@ -1,0 +1,87 @@
+# Spring Cloud Vault Configuration for HCX Egypt
+# Integrates with HashiCorp Vault for secrets management
+
+spring:
+  cloud:
+    vault:
+      enabled: true
+      uri: https://vault.healthflow.eg:8200
+      authentication: KUBERNETES
+      kubernetes:
+        role: hcx-api-gateway
+        kubernetes-path: kubernetes
+        service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      
+      # Connection settings
+      connection-timeout: 5000
+      read-timeout: 15000
+      
+      # Fail fast if Vault is unavailable
+      fail-fast: true
+      
+      # Database credentials
+      database:
+        enabled: true
+        role: hcx-postgres-role
+        backend: database
+        
+      # Generic secrets
+      generic:
+        enabled: true
+        backend: secret
+        default-context: hcx-egypt
+        application-name: ${spring.application.name}
+        
+      # PKI for TLS certificates
+      pki:
+        enabled: true
+        role: hcx-service
+        backend: pki
+        common-name: ${spring.application.name}.healthflow.eg
+        
+  # Database configuration (credentials from Vault)
+  datasource:
+    url: jdbc:postgresql://postgresql:5432/hcx_egypt?sslmode=require
+    username: ${vault.database.username}
+    password: ${vault.database.password}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      
+  # Redis configuration (credentials from Vault)
+  redis:
+    host: redis
+    port: 6379
+    password: ${vault.redis.password}
+    ssl: true
+    timeout: 2000ms
+    
+  # Kafka configuration (credentials from Vault)
+  kafka:
+    bootstrap-servers: kafka:9093
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-512
+      sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${vault.kafka.username}" password="${vault.kafka.password}";
+      
+# Keycloak configuration (credentials from Vault)
+keycloak:
+  auth-server-url: https://auth.healthflow.eg/auth
+  realm: healthflow-hcx-egypt
+  resource: hcx-gateway
+  credentials:
+    secret: ${vault.keycloak.client-secret}
+  ssl-required: external
+  
+# Encryption keys from Vault
+hcx:
+  encryption:
+    key: ${vault.hcx.encryption-key}
+    algorithm: AES-256-GCM
+  signing:
+    private-key: ${vault.hcx.signing-private-key}
+    public-key: ${vault.hcx.signing-public-key}
+    algorithm: RS256

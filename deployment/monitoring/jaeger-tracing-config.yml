@@ -1,0 +1,229 @@
+# Jaeger Distributed Tracing Configuration for HCX Egypt
+# Provides end-to-end visibility into request flows
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaeger-config
+  namespace: hcx-egypt-prod
+data:
+  jaeger-config.yml: |
+    # Jaeger Collector Configuration
+    collector:
+      zipkin:
+        host-port: :9411
+      grpc:
+        host-port: :14250
+      http:
+        host-port: :14268
+      
+      # Queue configuration
+      queue:
+        size: 5000
+        num-workers: 100
+        
+    # Storage backend (Elasticsearch)
+    storage:
+      type: elasticsearch
+      elasticsearch:
+        server-urls: https://elasticsearch:9200
+        username: ${ES_USERNAME}
+        password: ${ES_PASSWORD}
+        index-prefix: jaeger
+        num-shards: 5
+        num-replicas: 1
+        bulk:
+          size: 5000000  # 5MB
+          workers: 10
+          flush-interval: 200ms
+        timeout: 10s
+        
+    # Sampling strategies
+    sampling:
+      strategies-file: /etc/jaeger/sampling-strategies.json
+      
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaeger-sampling-strategies
+  namespace: hcx-egypt-prod
+data:
+  sampling-strategies.json: |
+    {
+      "default_strategy": {
+        "type": "probabilistic",
+        "param": 0.1
+      },
+      "service_strategies": [
+        {
+          "service": "api-gateway",
+          "type": "probabilistic",
+          "param": 0.5
+        },
+        {
+          "service": "hcx-api",
+          "type": "probabilistic",
+          "param": 0.3
+        },
+        {
+          "service": "hcx-pipeline-jobs",
+          "type": "probabilistic",
+          "param": 0.2
+        },
+        {
+          "service": "admin-api",
+          "type": "const",
+          "param": 1
+        }
+      ]
+    }
+
+---
+# Spring Boot OpenTelemetry Configuration
+spring:
+  application:
+    name: ${SERVICE_NAME}
+    
+  sleuth:
+    enabled: false  # Disable Spring Cloud Sleuth, use OpenTelemetry instead
+    
+# OpenTelemetry configuration
+otel:
+  traces:
+    exporter: jaeger
+  exporter:
+    jaeger:
+      endpoint: http://jaeger-collector:14250
+      timeout: 10s
+  resource:
+    attributes:
+      service.name: ${spring.application.name}
+      service.namespace: hcx-egypt
+      service.version: ${BUILD_VERSION}
+      deployment.environment: ${ENVIRONMENT}
+      
+  instrumentation:
+    # Auto-instrumentation
+    jdbc:
+      enabled: true
+    spring-webmvc:
+      enabled: true
+    spring-webflux:
+      enabled: true
+    kafka:
+      enabled: true
+    redis:
+      enabled: true
+      
+  # Sampling
+  traces:
+    sampler:
+      probability: 0.1  # Sample 10% of traces by default
+      
+  # Propagation
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+    
+---
+# Jaeger Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger-all-in-one
+  namespace: hcx-egypt-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+    spec:
+      containers:
+        - name: jaeger
+          image: jaegertracing/all-in-one:1.50
+          env:
+            - name: COLLECTOR_ZIPKIN_HOST_PORT
+              value: ":9411"
+            - name: SPAN_STORAGE_TYPE
+              value: "elasticsearch"
+            - name: ES_SERVER_URLS
+              value: "https://elasticsearch:9200"
+            - name: ES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-credentials
+                  key: username
+            - name: ES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-credentials
+                  key: password
+          ports:
+            - containerPort: 5775
+              protocol: UDP
+            - containerPort: 6831
+              protocol: UDP
+            - containerPort: 6832
+              protocol: UDP
+            - containerPort: 5778
+              protocol: TCP
+            - containerPort: 16686
+              protocol: TCP
+            - containerPort: 14250
+              protocol: TCP
+            - containerPort: 14268
+              protocol: TCP
+            - containerPort: 14269
+              protocol: TCP
+            - containerPort: 9411
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2
+              memory: 4Gi
+              
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-collector
+  namespace: hcx-egypt-prod
+spec:
+  selector:
+    app: jaeger
+  ports:
+    - name: grpc
+      port: 14250
+      targetPort: 14250
+    - name: http
+      port: 14268
+      targetPort: 14268
+    - name: zipkin
+      port: 9411
+      targetPort: 9411
+  type: ClusterIP
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-query
+  namespace: hcx-egypt-prod
+spec:
+  selector:
+    app: jaeger
+  ports:
+    - name: query
+      port: 16686
+      targetPort: 16686
+  type: LoadBalancer

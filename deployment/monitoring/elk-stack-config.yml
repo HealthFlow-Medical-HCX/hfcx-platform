@@ -1,0 +1,264 @@
+# ELK Stack Configuration for HCX Egypt
+# Centralized logging with Elasticsearch, Logstash, and Kibana
+
+---
+# Elasticsearch StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: hcx-egypt-prod
+spec:
+  serviceName: elasticsearch
+  replicas: 3
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      initContainers:
+        - name: increase-vm-max-map
+          image: busybox
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+          env:
+            - name: cluster.name
+              value: "hcx-egypt-logs"
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: discovery.seed_hosts
+              value: "elasticsearch-0.elasticsearch,elasticsearch-1.elasticsearch,elasticsearch-2.elasticsearch"
+            - name: cluster.initial_master_nodes
+              value: "elasticsearch-0,elasticsearch-1,elasticsearch-2"
+            - name: ES_JAVA_OPTS
+              value: "-Xms2g -Xmx2g"
+            - name: xpack.security.enabled
+              value: "true"
+            - name: xpack.security.transport.ssl.enabled
+              value: "true"
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-credentials
+                  key: password
+          ports:
+            - containerPort: 9200
+              name: http
+            - containerPort: 9300
+              name: transport
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
+          resources:
+            requests:
+              cpu: 1
+              memory: 4Gi
+            limits:
+              cpu: 2
+              memory: 8Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast-ssd
+        resources:
+          requests:
+            storage: 100Gi
+
+---
+# Logstash Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: hcx-egypt-prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:8.10.0
+          ports:
+            - containerPort: 5044
+              name: beats
+            - containerPort: 9600
+              name: http
+          env:
+            - name: LS_JAVA_OPTS
+              value: "-Xmx1g -Xms1g"
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/logstash/pipeline
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 1
+              memory: 4Gi
+      volumes:
+        - name: config
+          configMap:
+            name: logstash-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: hcx-egypt-prod
+data:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+      }
+      
+      # Kafka input for application logs
+      kafka {
+        bootstrap_servers => "kafka:9092"
+        topics => ["hcx-logs"]
+        codec => json
+        group_id => "logstash-consumer"
+      }
+    }
+    
+    filter {
+      # Parse JSON logs
+      if [message] =~ /^\{.*\}$/ {
+        json {
+          source => "message"
+        }
+      }
+      
+      # Add geoip for Egyptian IP addresses
+      geoip {
+        source => "client_ip"
+        database => "/usr/share/logstash/geoip/GeoLite2-City.mmdb"
+      }
+      
+      # Parse timestamps
+      date {
+        match => ["timestamp", "ISO8601", "yyyy-MM-dd HH:mm:ss"]
+        target => "@timestamp"
+      }
+      
+      # Enrich with Egyptian context
+      mutate {
+        add_field => {
+          "country" => "Egypt"
+          "timezone" => "Africa/Cairo"
+          "deployment" => "hcx-egypt-prod"
+        }
+      }
+      
+      # Classify log levels
+      if [level] == "ERROR" or [level] == "FATAL" {
+        mutate {
+          add_tag => ["alert"]
+        }
+      }
+      
+      # Extract transaction IDs for correlation
+      if [message] =~ /transaction_id/ {
+        grok {
+          match => { "message" => "transaction_id=%{UUID:transaction_id}" }
+        }
+      }
+    }
+    
+    output {
+      elasticsearch {
+        hosts => ["https://elasticsearch:9200"]
+        user => "${ES_USERNAME}"
+        password => "${ES_PASSWORD}"
+        index => "hcx-logs-%{+YYYY.MM.dd}"
+        ssl => true
+        ssl_certificate_verification => true
+      }
+      
+      # Send critical errors to alerting system
+      if "alert" in [tags] {
+        http {
+          url => "https://alertmanager:9093/api/v1/alerts"
+          http_method => "post"
+          format => "json"
+        }
+      }
+    }
+
+---
+# Kibana Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: hcx-egypt-prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+        - name: kibana
+          image: docker.elastic.co/kibana/kibana:8.10.0
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: "https://elasticsearch:9200"
+            - name: ELASTICSEARCH_USERNAME
+              value: "kibana_system"
+            - name: ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-credentials
+                  key: kibana_password
+            - name: SERVER_NAME
+              value: "kibana.healthflow.eg"
+            - name: I18N_LOCALE
+              value: "en"  # Can be changed to "ar" for Arabic
+          ports:
+            - containerPort: 5601
+              name: http
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1
+              memory: 2Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: hcx-egypt-prod
+spec:
+  selector:
+    app: kibana
+  ports:
+    - port: 5601
+      targetPort: 5601
+  type: LoadBalancer
