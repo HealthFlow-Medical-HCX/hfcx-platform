@@ -1,0 +1,104 @@
+sequenceDiagram
+    participant Provider as Provider System<br/>(HIS/EMR)
+    participant PS as Provider Service<br/>provider-service
+    participant SDK as HCX SDK<br/>integration-sdks
+    participant AG as API Gateway<br/>hfcx-platform
+    participant BL as Business Logic<br/>hfcx-platform
+    participant REG as Registry<br/>sunbird-rc-core
+    participant DB as Database<br/>PostgreSQL
+    participant KAFKA as Message Queue<br/>Kafka
+    participant PayerSDK as Payer SDK<br/>integration-sdks
+    participant Payer as Payer System
+
+    Note over Provider,Payer: 1. Eligibility Check Workflow
+    Provider->>PS: Check patient eligibility
+    PS->>SDK: Create eligibility request
+    SDK->>REG: Lookup payer public key
+    REG-->>SDK: Return public key
+    SDK->>SDK: Encrypt payload (JWE)
+    SDK->>AG: POST /coverageeligibility/check
+    AG->>AG: Authenticate & validate
+    AG->>BL: Route to eligibility service
+    BL->>DB: Store request
+    BL->>KAFKA: Publish eligibility event
+    BL-->>AG: Return request ID
+    AG-->>SDK: 202 Accepted
+    SDK-->>PS: Request submitted
+    PS-->>Provider: Eligibility check initiated
+
+    KAFKA->>BL: Process eligibility event
+    BL->>REG: Lookup payer endpoint
+    REG-->>BL: Return payer details
+    BL->>PayerSDK: Forward encrypted request
+    PayerSDK->>Payer: Deliver eligibility check
+    Payer->>Payer: Decrypt & process
+    Payer-->>PayerSDK: Eligibility response
+    PayerSDK->>AG: POST /coverageeligibility/on_check
+    AG->>BL: Process response
+    BL->>DB: Store response
+    BL->>KAFKA: Publish response event
+    BL-->>AG: Acknowledge
+    AG-->>PayerSDK: 200 OK
+
+    KAFKA->>BL: Process response event
+    BL->>SDK: Notify provider
+    SDK->>PS: Eligibility response
+    PS->>Provider: Display coverage details
+
+    Note over Provider,Payer: 2. Pre-Authorization Workflow
+    Provider->>PS: Submit pre-auth request
+    PS->>SDK: Create pre-auth request (FHIR)
+    SDK->>REG: Lookup payer public key
+    REG-->>SDK: Return public key
+    SDK->>SDK: Encrypt payload
+    SDK->>AG: POST /preauth/submit
+    AG->>BL: Route to pre-auth service
+    BL->>DB: Store request
+    BL->>KAFKA: Publish pre-auth event
+    BL-->>AG: Return request ID
+    AG-->>SDK: 202 Accepted
+
+    KAFKA->>BL: Process pre-auth event
+    BL->>PayerSDK: Forward to payer
+    PayerSDK->>Payer: Deliver pre-auth request
+    Payer->>Payer: Review & adjudicate
+    Payer-->>PayerSDK: Approval/Denial
+    PayerSDK->>AG: POST /preauth/on_submit
+    AG->>BL: Process response
+    BL->>DB: Update pre-auth status
+    BL->>SDK: Notify provider
+    SDK->>PS: Pre-auth response
+    PS->>Provider: Display approval status
+
+    Note over Provider,Payer: 3. Claim Submission Workflow
+    Provider->>PS: Submit claim
+    PS->>SDK: Create claim request (FHIR)
+    SDK->>SDK: Attach pre-auth reference
+    SDK->>SDK: Encrypt payload
+    SDK->>AG: POST /claim/submit
+    AG->>BL: Route to claims service
+    BL->>DB: Store claim
+    BL->>KAFKA: Publish claim event
+    BL-->>AG: Return claim ID
+    AG-->>SDK: 202 Accepted
+
+    KAFKA->>BL: Process claim event
+    BL->>PayerSDK: Forward to payer
+    PayerSDK->>Payer: Deliver claim
+    Payer->>Payer: Adjudicate claim
+    Payer-->>PayerSDK: Claim response
+    PayerSDK->>AG: POST /claim/on_submit
+    AG->>BL: Process response
+    BL->>DB: Update claim status
+    BL->>SDK: Notify provider
+    SDK->>PS: Claim adjudication result
+    PS->>Provider: Display payment amount
+
+    Note over Provider,Payer: 4. Payment Notification
+    Payer->>PayerSDK: Payment processed
+    PayerSDK->>AG: POST /paymentnotice/request
+    AG->>BL: Process payment notice
+    BL->>DB: Record payment
+    BL->>SDK: Notify provider
+    SDK->>PS: Payment received
+    PS->>Provider: Update financial records

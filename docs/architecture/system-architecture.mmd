@@ -1,0 +1,122 @@
+graph TB
+    subgraph "Participant Layer"
+        PP[Provider Portal<br/>hcx-apps]
+        PayP[Payer Portal<br/>hcx-apps]
+        TPAP[TPA Portal<br/>hcx-apps]
+        BSP[Beneficiary Portal<br/>hcx-apps]
+        AP[Admin Portal<br/>hcx-apps]
+    end
+
+    subgraph "API Gateway Layer"
+        AG[API Gateway<br/>hfcx-platform]
+        AUTH[Authentication<br/>Keycloak]
+        RL[Rate Limiting]
+        LB[Load Balancer]
+    end
+
+    subgraph "Core Business Logic Layer"
+        EV[Eligibility<br/>Verification]
+        PA[Pre-Authorization<br/>Processing]
+        CP[Claims<br/>Processing]
+        CE[Communication<br/>Exchange]
+        PN[Payment<br/>Notifications]
+        WE[Workflow<br/>Engine]
+    end
+
+    subgraph "Integration Layer"
+        PS[Provider Service<br/>provider-service]
+        SDK[Integration SDKs<br/>integration-sdks]
+        JWE[JWE Helper<br/>jwe-helper]
+    end
+
+    subgraph "Registry Layer"
+        REG[Participant Registry<br/>sunbird-rc-core]
+        CRED[Verifiable Credentials]
+        PKI[Public Key Infrastructure]
+    end
+
+    subgraph "Data Layer"
+        PG[(PostgreSQL<br/>Database)]
+        RD[(Redis<br/>Cache)]
+        KF[(Kafka<br/>Message Queue)]
+    end
+
+    subgraph "Monitoring Layer"
+        PROM[Prometheus<br/>Metrics]
+        GRAF[Grafana<br/>Dashboards]
+        JAEG[Jaeger<br/>Tracing]
+        ELK[ELK Stack<br/>Logging]
+    end
+
+    subgraph "External Systems"
+        HIS[Hospital Information<br/>Systems]
+        PAYER[Payer Claims<br/>Systems]
+        TPA[TPA Admin<br/>Systems]
+    end
+
+    %% Connections
+    PP --> AG
+    PayP --> AG
+    TPAP --> AG
+    BSP --> AG
+    AP --> AG
+
+    AG --> AUTH
+    AG --> RL
+    AG --> LB
+
+    AG --> EV
+    AG --> PA
+    AG --> CP
+    AG --> CE
+    AG --> PN
+    AG --> WE
+
+    EV --> PG
+    PA --> PG
+    CP --> PG
+    CE --> PG
+    PN --> PG
+    WE --> KF
+
+    EV --> RD
+    PA --> RD
+    CP --> RD
+
+    AG --> REG
+    REG --> CRED
+    REG --> PKI
+
+    PS --> AG
+    SDK --> AG
+    JWE --> AG
+
+    HIS --> PS
+    PAYER --> SDK
+    TPA --> SDK
+
+    AG --> PROM
+    AG --> JAEG
+    AG --> ELK
+    PROM --> GRAF
+
+    style PP fill:#e1f5ff
+    style PayP fill:#e1f5ff
+    style TPAP fill:#e1f5ff
+    style BSP fill:#e1f5ff
+    style AP fill:#e1f5ff
+    style AG fill:#ffe1e1
+    style EV fill:#fff4e1
+    style PA fill:#fff4e1
+    style CP fill:#fff4e1
+    style CE fill:#fff4e1
+    style PN fill:#fff4e1
+    style WE fill:#fff4e1
+    style PG fill:#e1ffe1
+    style RD fill:#e1ffe1
+    style KF fill:#e1ffe1
+    style REG fill:#f4e1ff
+    style PROM fill:#ffe1f4
+    style GRAF fill:#ffe1f4
+    style JAEG fill:#ffe1f4
+    style ELK fill:#ffe1f4

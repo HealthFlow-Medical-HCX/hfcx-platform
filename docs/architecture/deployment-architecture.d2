@@ -1,0 +1,201 @@
+direction: right
+
+title: {
+  label: HealthFlow HCX Egypt - Deployment Architecture
+  near: top-center
+  shape: text
+  style.font-size: 24
+  style.bold: true
+}
+
+internet: Internet {
+  shape: cloud
+  style.fill: "#e3f2fd"
+}
+
+loadbalancer: AWS Application Load Balancer {
+  shape: hexagon
+  style.fill: "#fff3e0"
+  
+  alb: ALB {
+    label: "api.healthflow.eg\nSSL/TLS Termination"
+  }
+}
+
+kubernetes: Kubernetes Cluster (EKS) {
+  style.fill: "#f3e5f5"
+  
+  namespace_prod: Namespace: hcx-egypt-prod {
+    style.fill: "#e8f5e9"
+    
+    api_gateway: API Gateway {
+      label: "hfcx-platform\n3 replicas\nPort: 8080"
+      shape: rectangle
+      style.fill: "#ffebee"
+    }
+    
+    hcx_api: HCX API Service {
+      label: "hfcx-platform\n9 replicas\nPort: 8081"
+      shape: rectangle
+      style.fill: "#ffebee"
+    }
+    
+    pipeline_jobs: Pipeline Jobs {
+      label: "hfcx-platform\n3 replicas\nKafka Consumer"
+      shape: rectangle
+      style.fill: "#ffebee"
+    }
+    
+    provider_service: Provider Service {
+      label: "provider-service\n3 replicas\nPort: 8082"
+      shape: rectangle
+      style.fill: "#e3f2fd"
+    }
+    
+    registry: Registry Service {
+      label: "sunbird-rc-core\n3 replicas\nPort: 8083"
+      shape: rectangle
+      style.fill: "#f3e5f5"
+    }
+    
+    frontend: Frontend Applications {
+      label: "hcx-apps\n3 replicas\nNginx + React"
+      shape: rectangle
+      style.fill: "#fff3e0"
+    }
+  }
+  
+  namespace_monitoring: Namespace: monitoring {
+    style.fill: "#fce4ec"
+    
+    prometheus: Prometheus {
+      label: "Metrics Collection\nPort: 9090"
+      shape: cylinder
+    }
+    
+    grafana: Grafana {
+      label: "Dashboards\nPort: 3000"
+      shape: rectangle
+    }
+    
+    jaeger: Jaeger {
+      label: "Distributed Tracing\nPort: 16686"
+      shape: rectangle
+    }
+    
+    elasticsearch: Elasticsearch {
+      label: "Log Storage\n3 nodes"
+      shape: cylinder
+    }
+    
+    logstash: Logstash {
+      label: "Log Ingestion\nPort: 5044"
+      shape: rectangle
+    }
+    
+    kibana: Kibana {
+      label: "Log Search\nPort: 5601"
+      shape: rectangle
+    }
+  }
+}
+
+databases: Managed Databases {
+  style.fill: "#e8f5e9"
+  
+  postgresql: PostgreSQL (RDS) {
+    label: "Multi-AZ Deployment\ndb.r6g.2xlarge\n500 GB SSD"
+    shape: cylinder
+    style.fill: "#c8e6c9"
+  }
+  
+  redis: Redis (ElastiCache) {
+    label: "Cluster Mode\ncache.r6g.large\n3 nodes"
+    shape: cylinder
+    style.fill: "#ffccbc"
+  }
+  
+  kafka: Kafka (MSK) {
+    label: "3 brokers\nkafka.m5.large\n1 TB storage"
+    shape: cylinder
+    style.fill: "#b3e5fc"
+  }
+}
+
+vault: HashiCorp Vault {
+  label: "Secrets Management\nHA Cluster"
+  shape: hexagon
+  style.fill: "#fff9c4"
+}
+
+s3: S3 Buckets {
+  shape: cylinder
+  style.fill: "#d1c4e9"
+  
+  backups: Backups Bucket {
+    label: "Database backups\nLog archives"
+  }
+  
+  documents: Documents Bucket {
+    label: "Claim attachments\nMedical records"
+  }
+}
+
+external: External Systems {
+  style.fill: "#ffccbc"
+  
+  providers: Provider Systems {
+    label: "Hospital HIS/EMR\nClinic Management"
+    shape: rectangle
+  }
+  
+  payers: Payer Systems {
+    label: "Insurance Claims\nAdjudication Systems"
+    shape: rectangle
+  }
+  
+  tpas: TPA Systems {
+    label: "Third-Party Admin\nClaims Processing"
+    shape: rectangle
+  }
+}
+
+# Connections
+internet -> loadbalancer.alb: HTTPS
+loadbalancer.alb -> kubernetes.namespace_prod.api_gateway: HTTP
+loadbalancer.alb -> kubernetes.namespace_prod.frontend: HTTP
+
+kubernetes.namespace_prod.api_gateway -> kubernetes.namespace_prod.hcx_api
+kubernetes.namespace_prod.api_gateway -> kubernetes.namespace_prod.provider_service
+kubernetes.namespace_prod.api_gateway -> kubernetes.namespace_prod.registry
+
+kubernetes.namespace_prod.hcx_api -> databases.postgresql: SQL
+kubernetes.namespace_prod.hcx_api -> databases.redis: Cache
+kubernetes.namespace_prod.hcx_api -> databases.kafka: Pub/Sub
+
+kubernetes.namespace_prod.pipeline_jobs -> databases.kafka: Consume
+kubernetes.namespace_prod.pipeline_jobs -> databases.postgresql: SQL
+
+kubernetes.namespace_prod.provider_service -> databases.postgresql: SQL
+kubernetes.namespace_prod.registry -> databases.postgresql: SQL
+
+kubernetes.namespace_prod.api_gateway -> vault: Secrets
+kubernetes.namespace_prod.hcx_api -> vault: Secrets
+
+kubernetes.namespace_prod.hcx_api -> s3.documents: Store/Retrieve
+kubernetes.namespace_prod.pipeline_jobs -> s3.backups: Backup
+
+# Monitoring connections
+kubernetes.namespace_prod.api_gateway -> kubernetes.namespace_monitoring.prometheus: Metrics
+kubernetes.namespace_prod.hcx_api -> kubernetes.namespace_monitoring.prometheus: Metrics
+kubernetes.namespace_prod.api_gateway -> kubernetes.namespace_monitoring.jaeger: Traces
+kubernetes.namespace_prod.hcx_api -> kubernetes.namespace_monitoring.logstash: Logs
+
+kubernetes.namespace_monitoring.prometheus -> kubernetes.namespace_monitoring.grafana: Data
+kubernetes.namespace_monitoring.logstash -> kubernetes.namespace_monitoring.elasticsearch: Index
+kubernetes.namespace_monitoring.elasticsearch -> kubernetes.namespace_monitoring.kibana: Query
+
+# External connections
+external.providers -> loadbalancer.alb: HTTPS API
+external.payers -> loadbalancer.alb: HTTPS API
+external.tpas -> loadbalancer.alb: HTTPS API

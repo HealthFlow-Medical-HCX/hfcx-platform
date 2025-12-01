@@ -1,0 +1,79 @@
+graph LR
+    subgraph "Frontend Repositories"
+        APPS[hcx-apps<br/>TypeScript<br/>React Portals]
+        COMMON[hcx-app-common-component<br/>TypeScript<br/>Shared UI Components]
+        DEMO[hcx-demo-app<br/>JavaScript<br/>Demo Application]
+    end
+
+    subgraph "Core Platform Repositories"
+        PLATFORM[hfcx-platform<br/>Java<br/>Core Gateway & APIs]
+        PROVIDER[provider-service<br/>Java<br/>Provider Operations]
+        REGISTRY[sunbird-rc-core<br/>Java<br/>Registry & Credentials]
+    end
+
+    subgraph "Integration Repositories"
+        SDK[integration-sdks<br/>C#, Java, Python, JS<br/>Client Libraries]
+        JWE[jwe-helper<br/>Java<br/>Encryption Utilities]
+    end
+
+    subgraph "Testing Repositories"
+        MOCK_PAYER[hcx-mock-payer-app<br/>TypeScript<br/>Mock Payer Simulator]
+        MOCK_SERVICE[hcx-mock-service<br/>Java<br/>Mock Gateway]
+    end
+
+    subgraph "Documentation Repositories"
+        FHIR[fhir-examples<br/>JSON/XML<br/>FHIR Templates]
+    end
+
+    subgraph "Infrastructure Repositories"
+        DEVOPS[hcx-devops<br/>Mustache, Shell<br/>Deployment Scripts]
+    end
+
+    %% Frontend Dependencies
+    APPS -->|Uses UI Components| COMMON
+    APPS -->|API Calls| PLATFORM
+    APPS -->|Optional SDK| SDK
+    DEMO -->|Uses SDK| SDK
+
+    %% Platform Dependencies
+    PLATFORM -->|Registry Lookup| REGISTRY
+    PLATFORM -->|Encryption| JWE
+    PLATFORM -->|Provider Ops| PROVIDER
+    PLATFORM -->|Deployed By| DEVOPS
+
+    %% Provider Service Dependencies
+    PROVIDER -->|API Calls| PLATFORM
+    PROVIDER -->|Encryption| JWE
+
+    %% SDK Dependencies
+    SDK -->|Encryption| JWE
+    SDK -->|API Integration| PLATFORM
+    SDK -->|References| FHIR
+
+    %% Mock Applications Dependencies
+    MOCK_PAYER -->|Uses SDK| SDK
+    MOCK_PAYER -->|API Calls| PLATFORM
+    MOCK_SERVICE -->|Simulates| PLATFORM
+
+    %% FHIR Examples
+    FHIR -->|Used By| PLATFORM
+    FHIR -->|Used By| SDK
+
+    %% Deployment
+    DEVOPS -->|Deploys| PLATFORM
+    DEVOPS -->|Deploys| APPS
+    DEVOPS -->|Deploys| PROVIDER
+    DEVOPS -->|Deploys| REGISTRY
+
+    style APPS fill:#e1f5ff,stroke:#01579b
+    style COMMON fill:#e1f5ff,stroke:#01579b
+    style DEMO fill:#e1f5ff,stroke:#01579b
+    style PLATFORM fill:#ffe1e1,stroke:#b71c1c
+    style PROVIDER fill:#ffe1e1,stroke:#b71c1c
+    style REGISTRY fill:#ffe1e1,stroke:#b71c1c
+    style SDK fill:#fff4e1,stroke:#e65100
+    style JWE fill:#fff4e1,stroke:#e65100
+    style MOCK_PAYER fill:#e1ffe1,stroke:#1b5e20
+    style MOCK_SERVICE fill:#e1ffe1,stroke:#1b5e20
+    style FHIR fill:#f4e1ff,stroke:#4a148c
+    style DEVOPS fill:#ffe1f4,stroke:#880e4f
