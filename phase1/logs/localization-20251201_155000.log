@@ -1,0 +1,23 @@
+[0;34m[2025-12-01 15:50:00][0m =========================================
+[0;34m[2025-12-01 15:50:00][0m HCX Egypt Localization Script
+[0;34m[2025-12-01 15:50:00][0m =========================================
+[0;34m[2025-12-01 15:50:00][0m Mode: LIVE
+[0;34m[2025-12-01 15:50:00][0m Repository: /home/ubuntu/hcx-egypt
+[0;34m[2025-12-01 15:50:00][0m =========================================
+[0;34m[2025-12-01 15:50:00][0m Generating Egyptian phone number validator
+[0;32m[SUCCESS][0m Generated: /home/ubuntu/hcx-egypt/phase1/generated/EgyptianPhoneValidator.java
+[0;34m[2025-12-01 15:50:00][0m Generating Egyptian National ID validator
+[0;32m[SUCCESS][0m Generated: /home/ubuntu/hcx-egypt/phase1/generated/EgyptianNationalIDValidator.java
+[0;34m[2025-12-01 15:50:00][0m Generating Egyptian governorates enum
+[0;32m[SUCCESS][0m Generated: /home/ubuntu/hcx-egypt/phase1/generated/EgyptianGovernorate.java
+[0;34m[2025-12-01 15:50:00][0m Generating Egyptian IBAN validator
+[0;32m[SUCCESS][0m Generated: /home/ubuntu/hcx-egypt/phase1/generated/EgyptianIBANValidator.java
+[0;34m[2025-12-01 15:50:00][0m Updating test data with Egyptian examples
+[0;32m[SUCCESS][0m Test data updated
+[0;34m[2025-12-01 15:50:01][0m Generating localization report: /home/ubuntu/hcx-egypt/phase1/docs/localization-report-20251201_155001.md
+[0;32m[SUCCESS][0m Report generated: /home/ubuntu/hcx-egypt/phase1/docs/localization-report-20251201_155001.md
+[0;34m[2025-12-01 15:50:01][0m =========================================
+[0;32m[SUCCESS][0m Localization completed!
+[0;34m[2025-12-01 15:50:01][0m =========================================
+[0;34m[2025-12-01 15:50:01][0m Generated files are in: /home/ubuntu/hcx-egypt/phase1/generated/
+[0;34m[2025-12-01 15:50:01][0m See report for integration instructions

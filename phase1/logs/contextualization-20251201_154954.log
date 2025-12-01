@@ -1,0 +1,88 @@
+[0;34m[2025-12-01 15:49:54][0m =========================================
+[0;34m[2025-12-01 15:49:54][0m HCX Egypt Contextualization Script
+[0;34m[2025-12-01 15:49:54][0m =========================================
+[0;34m[2025-12-01 15:49:54][0m Mode: DRY RUN
+[0;34m[2025-12-01 15:49:54][0m Repository: /home/ubuntu/hcx-egypt
+[0;34m[2025-12-01 15:49:54][0m Log file: /home/ubuntu/hcx-egypt/phase1/logs/contextualization-20251201_154954.log
+[0;34m[2025-12-01 15:49:54][0m =========================================
+[0;34m[2025-12-01 15:49:54][0m Starting contextualization process...
+[0;34m[2025-12-01 15:49:54][0m Renaming Java packages: org.swasth.* -> org.healthflow.*
+[1;33m[WARNING][0m [DRY RUN] Would rename packages in 248 Java files
+[0;34m[2025-12-01 15:49:54][0m Updating Maven pom.xml files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Maven group IDs
+[0;34m[2025-12-01 15:49:54][0m   Pattern: <groupId>org\.swasth</groupId> -> <groupId>org.healthflow</groupId>
+[0;34m[2025-12-01 15:49:54][0m   Files: pom.xml
+[1;33m[WARNING][0m [DRY RUN] Would modify 28 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Maven artifact IDs
+[0;34m[2025-12-01 15:49:54][0m   Pattern: <artifactId>swasth- -> <artifactId>healthflow-
+[0;34m[2025-12-01 15:49:54][0m   Files: pom.xml
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Maven project names
+[0;34m[2025-12-01 15:49:54][0m   Pattern: <name>Swasth  -> <name>HealthFlow 
+[0;34m[2025-12-01 15:49:54][0m   Files: pom.xml
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Updating API endpoints
+[0;34m[2025-12-01 15:49:54][0m Replacing: Development API endpoints
+[0;34m[2025-12-01 15:49:54][0m   Pattern: dev-hcx\.swasth\.app -> dev-hcx.healthflow.eg
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{yml,yaml,properties,json,js,jsx,ts,tsx}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Staging API endpoints
+[0;34m[2025-12-01 15:49:54][0m   Pattern: staging-hcx\.swasth\.app -> staging-hcx.healthflow.eg
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{yml,yaml,properties,json,js,jsx,ts,tsx}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Production API endpoints
+[0;34m[2025-12-01 15:49:54][0m   Pattern: prod-hcx\.swasth\.app -> hcx.healthflow.eg
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{yml,yaml,properties,json,js,jsx,ts,tsx}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Documentation endpoints
+[0;34m[2025-12-01 15:49:54][0m   Pattern: docs\.swasth\.app -> docs.healthflow.eg
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{yml,yaml,properties,json,md,html}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Updating Keycloak configuration
+[0;34m[2025-12-01 15:49:54][0m Replacing: Keycloak realm names
+[0;34m[2025-12-01 15:49:54][0m   Pattern: swasth-health-claim-exchange -> healthflow-hcx-egypt
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{yml,yaml,properties,json}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Keycloak client IDs
+[0;34m[2025-12-01 15:49:54][0m   Pattern: swasth-hcx-gateway -> healthflow-hcx-gateway
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{yml,yaml,properties,json}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Updating frontend branding
+[0;34m[2025-12-01 15:49:54][0m Replacing: Application titles
+[0;34m[2025-12-01 15:49:54][0m   Pattern: Swasth HCX -> HealthFlow HCX Egypt
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{js,jsx,ts,tsx,html,json}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: Application descriptions
+[0;34m[2025-12-01 15:49:54][0m   Pattern: Swasth Health Claim Exchange -> HealthFlow Health Claim Exchange - Egypt
+[0;34m[2025-12-01 15:49:54][0m   Files: *.{js,jsx,ts,tsx,html,md}
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Replacing: NPM package names
+[0;34m[2025-12-01 15:49:54][0m   Pattern: "name": "swasth- -> "name": "healthflow-
+[0;34m[2025-12-01 15:49:54][0m   Files: package.json
+[1;33m[WARNING][0m [DRY RUN] Would modify 0 files
+[0;34m[2025-12-01 15:49:54][0m Updating documentation
+[0;34m[2025-12-01 15:49:54][0m Replacing: Markdown documentation - Swasth references
+[0;34m[2025-12-01 15:49:54][0m   Pattern: Swasth -> HealthFlow
+[0;34m[2025-12-01 15:49:54][0m   Files: *.md
+[1;33m[WARNING][0m [DRY RUN] Would modify 17 files
+[0;34m[2025-12-01 15:49:55][0m Replacing: Markdown documentation - India references
+[0;34m[2025-12-01 15:49:55][0m   Pattern: India -> Egypt
+[0;34m[2025-12-01 15:49:55][0m   Files: *.md
+[1;33m[WARNING][0m [DRY RUN] Would modify 12 files
+[0;34m[2025-12-01 15:49:55][0m Replacing: Regulatory body references
+[0;34m[2025-12-01 15:49:55][0m   Pattern: IRDAI -> FRA (Financial Regulatory Authority)
+[0;34m[2025-12-01 15:49:55][0m   Files: *.md
+[1;33m[WARNING][0m [DRY RUN] Would modify 3 files
+[0;34m[2025-12-01 15:49:55][0m Replacing: Health authority references
+[0;34m[2025-12-01 15:49:55][0m   Pattern: NHA\|ABDM -> MoHP (Ministry of Health and Population)
+[0;34m[2025-12-01 15:49:55][0m   Files: *.md
+[1;33m[WARNING][0m [DRY RUN] Would modify 2 files
+[0;34m[2025-12-01 15:49:55][0m Updating LICENSE files
+[1;33m[WARNING][0m [DRY RUN] Would update LICENSE files
+[0;34m[2025-12-01 15:49:55][0m Generating summary report: /home/ubuntu/hcx-egypt/phase1/docs/contextualization-report-20251201_154955.md
+[0;32m[SUCCESS][0m Report generated: /home/ubuntu/hcx-egypt/phase1/docs/contextualization-report-20251201_154955.md
+[0;34m[2025-12-01 15:49:55][0m =========================================
+[0;32m[SUCCESS][0m Contextualization completed!
+[0;34m[2025-12-01 15:49:55][0m =========================================
+[1;33m[WARNING][0m This was a DRY RUN. No changes were made.
+[0;34m[2025-12-01 15:49:55][0m Run without --dry-run to apply changes.
