@@ -1,0 +1,119 @@
+# Redis Caching Strategy for HCX Egypt
+# Multi-tier caching with intelligent eviction policies
+
+spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # Default 1 hour
+      cache-null-values: false
+      key-prefix: "hcx:egypt:"
+      use-key-prefix: true
+      
+  redis:
+    # Connection settings
+    host: redis
+    port: 6379
+    password: ${REDIS_PASSWORD}
+    ssl: true
+    timeout: 2000ms
+    
+    # Connection pool
+    lettuce:
+      pool:
+        max-active: 50
+        max-idle: 20
+        min-idle: 5
+        max-wait: 2000ms
+      shutdown-timeout: 100ms
+      
+    # Cluster configuration (for production HA)
+    cluster:
+      nodes:
+        - redis-node-1:6379
+        - redis-node-2:6379
+        - redis-node-3:6379
+      max-redirects: 3
+      
+# Custom cache configurations
+cache:
+  configs:
+    # Participant registry cache (rarely changes)
+    - name: participant-registry
+      ttl: 86400  # 24 hours
+      max-size: 10000
+      eviction-policy: LRU
+      
+    # FHIR resource cache (moderate changes)
+    - name: fhir-resources
+      ttl: 3600  # 1 hour
+      max-size: 50000
+      eviction-policy: LRU
+      
+    # Session cache (short-lived)
+    - name: user-sessions
+      ttl: 1800  # 30 minutes
+      max-size: 100000
+      eviction-policy: LFU
+      
+    # API response cache (very short-lived)
+    - name: api-responses
+      ttl: 300  # 5 minutes
+      max-size: 20000
+      eviction-policy: LRU
+      
+    # Rate limiting counters (very short TTL)
+    - name: rate-limits
+      ttl: 60  # 1 minute
+      max-size: 1000000
+      eviction-policy: VOLATILE_TTL
+      
+    # Encryption keys cache (long-lived, critical)
+    - name: encryption-keys
+      ttl: 43200  # 12 hours
+      max-size: 1000
+      eviction-policy: NO_EVICTION
+      
+# Redis performance tuning
+redis:
+  performance:
+    # Pipelining for bulk operations
+    pipeline-enabled: true
+    pipeline-batch-size: 100
+    
+    # Compression for large values
+    compression-enabled: true
+    compression-threshold: 1024  # Compress values > 1KB
+    
+    # Serialization
+    serializer: json  # JSON for readability, can use binary for performance
+    
+    # Connection timeout
+    connect-timeout: 5000
+    read-timeout: 3000
+    
+# Cache warming strategy
+cache-warming:
+  enabled: true
+  on-startup: true
+  scheduled: true
+  cron: "0 0 * * * *"  # Every hour
+  
+  # Entities to pre-load
+  entities:
+    - participant-registry
+    - fhir-profiles
+    - validation-rules
+    
+# Cache monitoring
+monitoring:
+  enabled: true
+  metrics:
+    - hit-rate
+    - miss-rate
+    - eviction-count
+    - size
+    - latency
+  alert-thresholds:
+    hit-rate-min: 0.8  # Alert if hit rate < 80%
+    latency-max: 100   # Alert if latency > 100ms

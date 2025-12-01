@@ -1,0 +1,100 @@
+# Enhanced Rate Limiting Configuration for HCX Egypt
+# Protects against DDoS and abuse
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        # Public API routes with strict rate limiting
+        - id: public-api
+          uri: lb://hcx-api
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter:
+                  replenishRate: 10  # tokens per second
+                  burstCapacity: 20  # maximum burst
+                  requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: hcx-api-circuit-breaker
+                fallbackUri: forward:/fallback/api
+                
+        # Authenticated API routes with moderate rate limiting
+        - id: authenticated-api
+          uri: lb://hcx-api
+          predicates:
+            - Path=/api/v2/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter:
+                  replenishRate: 50
+                  burstCapacity: 100
+                  requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: hcx-api-circuit-breaker
+                fallbackUri: forward:/fallback/api
+                
+        # Admin API with very strict rate limiting
+        - id: admin-api
+          uri: lb://hcx-api
+          predicates:
+            - Path=/admin/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter:
+                  replenishRate: 5
+                  burstCapacity: 10
+                  requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: admin-api-circuit-breaker
+                fallbackUri: forward:/fallback/admin
+
+# Redis configuration for rate limiting
+redis:
+  rate-limiter:
+    include-headers: true
+    headers:
+      - X-RateLimit-Remaining
+      - X-RateLimit-Replenish-Rate
+      - X-RateLimit-Burst-Capacity
+      
+# Circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      hcx-api-circuit-breaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 60s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        
+      admin-api-circuit-breaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 50
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 120s
+        failureRateThreshold: 30
+        eventConsumerBufferSize: 10
+        
+  timelimiter:
+    instances:
+      hcx-api-circuit-breaker:
+        timeoutDuration: 10s
+      admin-api-circuit-breaker:
+        timeoutDuration: 30s
