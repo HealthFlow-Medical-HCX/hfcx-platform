@@ -1,0 +1,309 @@
+version: '3.8'
+
+networks:
+  hcx-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  kafka-data:
+  elasticsearch-data:
+  keycloak-data:
+
+services:
+  # ============================================================================
+  # Infrastructure Services
+  # ============================================================================
+
+  hcx-postgres:
+    image: postgres:14-alpine
+    container_name: hcx-postgres
+    environment:
+      POSTGRES_DB: registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - hcx-network
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  hcx-redis:
+    image: redis:7-alpine
+    container_name: hcx-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - hcx-network
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  hcx-kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: hcx-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://hcx-kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@hcx-kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://hcx-kafka:29092,CONTROLLER://hcx-kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - hcx-network
+    ports:
+      - "9092:9092"
+    restart: unless-stopped
+
+  hcx-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: hcx-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - hcx-network
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  hcx-keycloak:
+    image: quay.io/keycloak/keycloak:22.0.5
+    container_name: hcx-keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://hcx-postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_HEALTH_ENABLED: 'true'
+      KC_METRICS_ENABLED: 'true'
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ./keycloak/hcx-egypt-realm.json:/opt/keycloak/data/import/hcx-egypt-realm.json:ro
+    networks:
+      - hcx-network
+    ports:
+      - "8080:8080"
+    depends_on:
+      hcx-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: 127.0.0.1\r\nConnection: close\r\n\r\n' >&3;grep 'HTTP/1.1 200 OK' <&3"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================================
+  # Backend Services
+  # ============================================================================
+
+  hcx-api:
+    image: hcx-api:egypt-fixed
+    container_name: hcx-api
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # PostgreSQL Configuration
+      POSTGRES_HOST: hcx-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      # Redis Configuration
+      REDIS_HOST: hcx-redis
+      REDIS_PORT: 6379
+      # Kafka Configuration
+      KAFKA_BOOTSTRAP_SERVERS: hcx-kafka:29092
+      # Elasticsearch Configuration
+      ES_HOST: hcx-elasticsearch
+      ES_PORT: 9200
+      # Keycloak Configuration
+      KEYCLOAK_URL: http://hcx-keycloak:8080
+      KEYCLOAK_REALM: hcx-egypt
+      JWT_JWK_URL: http://hcx-keycloak:8080/realms/hcx-egypt/protocol/openid-connect/certs
+    networks:
+      - hcx-network
+    ports:
+      - "8082:8080"
+    depends_on:
+      hcx-postgres:
+        condition: service_healthy
+      hcx-redis:
+        condition: service_healthy
+      hcx-elasticsearch:
+        condition: service_healthy
+      hcx-keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  hcx-api-gateway:
+    image: hcx-api-gateway:egypt-fixed
+    container_name: hcx-api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # IMPORTANT: Use dot notation for nested properties with hyphens
+      # Spring Boot's relaxed binding doesn't work well with hyphenated property names
+      hcx-api.basePath: http://hcx-api:8080
+      # Redis Configuration
+      REDIS_HOST: hcx-redis
+      REDIS_PORT: 6379
+      # Elasticsearch Configuration
+      ES_HOST: hcx-elasticsearch
+      ES_PORT: 9200
+      # Keycloak Configuration
+      JWT_JWK_URL: http://hcx-keycloak:8080/realms/hcx-egypt/protocol/openid-connect/certs
+    networks:
+      - hcx-network
+    ports:
+      - "8081:8095"
+    depends_on:
+      hcx-api:
+        condition: service_healthy
+      hcx-redis:
+        condition: service_healthy
+      hcx-elasticsearch:
+        condition: service_healthy
+      hcx-keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8095/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  hcx-provider-service:
+    image: hcx-provider-service:egypt-fixed
+    container_name: hcx-provider-service
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # HCX API Configuration
+      HCX_API_URL: http://hcx-api-gateway:8095
+      # Keycloak Configuration
+      KEYCLOAK_URL: http://hcx-keycloak:8080
+      KEYCLOAK_REALM: hcx-egypt
+      KEYCLOAK_CLIENT_ID: hcx-provider-service
+      KEYCLOAK_CLIENT_SECRET: ${PROVIDER_SERVICE_CLIENT_SECRET:-provider-secret}
+    networks:
+      - hcx-network
+    ports:
+      - "8083:8080"
+    depends_on:
+      hcx-api-gateway:
+        condition: service_healthy
+      hcx-keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # ============================================================================
+  # Frontend Applications
+  # ============================================================================
+
+  beneficiary-portal:
+    image: beneficiary-portal:latest
+    container_name: beneficiary-portal
+    environment:
+      REACT_APP_API_URL: http://localhost:8081
+      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_REALM: hcx-egypt
+      REACT_APP_KEYCLOAK_CLIENT_ID: beneficiary-portal
+    networks:
+      - hcx-network
+    ports:
+      - "3001:80"
+    depends_on:
+      - hcx-api-gateway
+    restart: unless-stopped
+
+  opd-portal:
+    image: opd-portal:latest
+    container_name: opd-portal
+    environment:
+      REACT_APP_API_URL: http://localhost:8081
+      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_REALM: hcx-egypt
+      REACT_APP_KEYCLOAK_CLIENT_ID: opd-portal
+    networks:
+      - hcx-network
+    ports:
+      - "3002:80"
+    depends_on:
+      - hcx-api-gateway
+    restart: unless-stopped
+
+  bsp-portal:
+    image: bsp-portal:latest
+    container_name: bsp-portal
+    environment:
+      REACT_APP_API_URL: http://localhost:8081
+      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_REALM: hcx-egypt
+      REACT_APP_KEYCLOAK_CLIENT_ID: bsp-portal
+    networks:
+      - hcx-network
+    ports:
+      - "3003:80"
+    depends_on:
+      - hcx-api-gateway
+    restart: unless-stopped
+
+  mock-payer-app:
+    image: mock-payer-app:latest
+    container_name: mock-payer-app
+    environment:
+      REACT_APP_API_URL: http://localhost:8081
+      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_REALM: hcx-egypt
+      REACT_APP_KEYCLOAK_CLIENT_ID: mock-payer-app
+    networks:
+      - hcx-network
+    ports:
+      - "3004:80"
+    depends_on:
+      - hcx-api-gateway
+    restart: unless-stopped
