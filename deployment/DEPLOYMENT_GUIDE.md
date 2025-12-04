@@ -699,3 +699,88 @@ See [ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md) for complete reference.
 **Document Version**: 1.0  
 **Last Updated**: December 3, 2025  
 **Maintained by**: HealthFlow Medical HCX Team
+
+
+---
+
+## HTTPS Configuration (Nginx Reverse Proxy)
+
+This section explains how to configure Nginx as a reverse proxy to provide HTTPS access to all HCX Egypt portals and services.
+
+### Step 1: Install Nginx
+
+```bash
+sudo apt update
+sudo apt install nginx -y
+```
+
+### Step 2: Generate Self-Signed SSL Certificates
+
+For testing and internal use, you can generate self-signed certificates:
+
+```bash
+# Create SSL directory
+sudo mkdir -p /etc/nginx/ssl
+
+# Generate self-signed certificate
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/nginx/ssl/hcx-egypt.key \
+  -out /etc/nginx/ssl/hcx-egypt.crt \
+  -subj "/C=EG/ST=Cairo/L=Cairo/O=HealthFlow Medical/OU=HCX Egypt/CN=hcx-egypt.local"
+
+# Set proper permissions
+sudo chmod 600 /etc/nginx/ssl/hcx-egypt.key
+sudo chmod 644 /etc/nginx/ssl/hcx-egypt.crt
+```
+
+**For production**, replace these with certificates from Let's Encrypt or a commercial CA.
+
+### Step 3: Configure Nginx
+
+Create a new Nginx configuration file:
+
+```bash
+sudo nano /etc/nginx/sites-available/hcx-portals.conf
+```
+
+Copy the contents of `nginx-hcx-portals.conf` from this repository into the new file.
+
+### Step 4: Enable the Site and Reload Nginx
+
+```bash
+# Disable default site
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Enable the HCX portals site
+sudo ln -sf /etc/nginx/sites-available/hcx-portals.conf /etc/nginx/sites-enabled/
+
+# Test Nginx configuration
+sudo nginx -t
+
+# Reload Nginx
+sudo systemctl reload nginx
+```
+
+### Step 5: Access Portals via HTTPS
+
+You can now access all portals securely via HTTPS:
+
+- **Beneficiary Portal**: `https://<your-server-ip>/beneficiary/`
+- **OPD Portal**: `https://<your-server-ip>/opd/`
+- **BSP Portal**: `https://<your-server-ip>/bsp/`
+- **Mock Payer App**: `https://<your-server-ip>/payer/`
+- **Keycloak**: `https://<your-server-ip>/auth/`
+
+**Note**: Your browser will show a security warning due to the self-signed certificate. You must accept the risk to proceed.
+
+### Nginx Configuration Details
+
+The provided Nginx configuration (`nginx-hcx-portals.conf`) includes:
+
+- **HTTP to HTTPS Redirect**: All HTTP traffic is automatically redirected to HTTPS.
+- **Reverse Proxy**: Forwards requests to the correct backend service or frontend portal.
+- **SSL/TLS Termination**: Handles SSL/TLS encryption and decryption.
+- **Security Headers**: Adds important security headers (HSTS, X-Frame-Options, etc.).
+- **Path-Based Routing**: Allows access to all portals via a single IP address and different paths (e.g., `/beneficiary/`, `/opd/`).
+
+---
