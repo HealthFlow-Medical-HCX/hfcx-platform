@@ -42,9 +42,9 @@ hcx-api:
 
 #postgres config
 postgres:
-  url: ${postgres_url:jdbc:postgresql://localhost:5432/postgres}
-  user: ${postgres_user:postgres}
-  password: ${postgres_password:postgres}
+  url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/postgres}
+  user: ${POSTGRES_USER}
+  password: ${POSTGRES_PASSWORD}
   onboardingOtpTable: ${onboarding_otp_table:onboarding_otp}
   onboardingTable: ${onboarding_table:onboarding}
 

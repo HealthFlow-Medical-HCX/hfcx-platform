@@ -52,11 +52,16 @@ public class EventHandler {
         // TODO: check and remove writing payload event to kafka
         String payloadEvent = eventGenerator.generatePayloadEvent(request);
         String metadataEvent = eventGenerator.generateMetadataEvent(request);
-        String query = String.format("INSERT INTO %s (mid,data,action,status,retrycount,lastupdatedon) VALUES ('%s','%s','%s','%s',%d,%d)",
-                postgresTableName, request.getMid(), JSONUtils.serialize(PayloadUtils.removeParticipantDetails(request.getPayload())),
-                request.getApiAction(), QUEUED_STATUS, 0, System.currentTimeMillis());
+        String query = "INSERT INTO " + postgresTableName
+                + " (mid,data,action,status,retrycount,lastupdatedon) VALUES (?,?,?,?,?,?)";
         logger.debug("Mid: " + request.getMid() + " :: Event: " + metadataEvent);
-        postgreSQLClient.execute(query);
+        postgreSQLClient.execute(query,
+                request.getMid(),
+                JSONUtils.serialize(PayloadUtils.removeParticipantDetails(request.getPayload())),
+                request.getApiAction(),
+                QUEUED_STATUS,
+                0,
+                System.currentTimeMillis());
         kafkaClient.send(payloadTopic, key, payloadEvent);
         kafkaClient.send(metadataTopic, key, metadataEvent);
         auditIndexer.createDocument(eventGenerator.generateAuditEvent(request));
