@@ -282,6 +282,52 @@ command: start-dev --import-realm
 
 See [keycloak/README.md](keycloak/README.md) for detailed instructions on assigning roles.
 
+#### 5. Required Environment Variables
+
+All deployments must set the following environment variables. Defaults in `application.yml` files now point at non-routable placeholder hostnames (`hcx-registry.healthflow.local`, `hcx-keycloak.healthflow.local`); a deployment that fails to override them will fail loudly rather than silently dial out to a Mumbai endpoint.
+
+**Networking and identity:**
+
+| Variable | Used by | Purpose | Example |
+|---|---|---|---|
+| `REGISTRY_BASE_PATH` | api-gateway, hcx-apis, hcx-scheduler-jobs | Sunbird RC participant registry | `http://hcx-registry:8081` |
+| `JWT_JWK_URL` | api-gateway | Keycloak JWK endpoint for JWT validation. Realm name must match `deployment/keycloak/hcx-egypt-realm.json` (`hcx-egypt`). | `http://hcx-keycloak:8080/auth/realms/hcx-egypt/protocol/openid-connect/certs` |
+| `JWT_ENABLED` | api-gateway | Enable JWT validation (`true` in production) | `true` |
+| `JWT_ISSUER` | api-gateway | Expected `iss` claim | `http://hcx-keycloak:8080/auth/realms/hcx-egypt` |
+| `JWT_AUDIENCE` | api-gateway | Expected `aud` claim | `hcx-gateway` |
+| `JWT_NS_PATH` | api-gateway | JsonPath into JWT for role extraction | `$.realm_access.roles` |
+| `REGISTRY_HCX_CODE` | api-gateway | This HCX instance's participant code | `1-d2d56996-…` |
+
+**Datastores:**
+
+| Variable | Used by | Purpose |
+|---|---|---|
+| `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | hcx-apis, hcx-onboard | Postgres connection. **Defaults will be removed in a follow-up; treat as required.** |
+| `REDIS_HOST`, `REDIS_PORT`, `REDIS_EXPIRES` | api-gateway | Redis for rate limiting and replay-protection cache |
+| `es_host`, `es_port` | api-gateway | Elasticsearch for audit |
+
+**Service URLs:**
+
+| Variable | Used by | Purpose |
+|---|---|---|
+| `hcx-api.basePath` | api-gateway | Internal hcx-apis URL — note dot notation per §1 above |
+| `hcx-onboard.basePath` | api-gateway | Internal hcx-onboard URL |
+
+**Renamed in this revision (breaking change):**
+
+| Old name | New name | Files affected |
+|---|---|---|
+| `registry_basePath` | `REGISTRY_BASE_PATH` | `hcx-apis/src/main/resources/application.yml` |
+| `registry_base_path` | `REGISTRY_BASE_PATH` | `hcx-scheduler-jobs/common-scheduler-job/src/main/resources/application.yml` |
+
+The api-gateway already used `REGISTRY_BASE_PATH`, so this normalizes naming across modules. Existing deployments setting only the old lowercase names must add the upper-snake-case variant.
+
+#### 6. Container base images
+
+All Java services now use `eclipse-temurin:17-jre-alpine` (replacing the unmaintained `sunbird/openjdk-java11-alpine:latest`). Java 11 bytecode runs on JRE 17 unchanged, so no Maven `<java.version>` change is required at this step. Pin to a SHA256 digest after the first successful CI build, e.g. `eclipse-temurin:17-jre-alpine@sha256:<digest>`.
+
+The Flink-based pipeline image (`hcx-pipeline-jobs/jobs-distribution/Dockerfile`) is **not** in this revision — Flink 1.12.0 is itself EOL and requires a coordinated upgrade tracked separately.
+
 ---
 
 ## Verification
