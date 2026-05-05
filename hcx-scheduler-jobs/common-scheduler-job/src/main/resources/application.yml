@@ -21,6 +21,15 @@ registry:
 
 topicCode:
  encryptionCertExpired: ${topic_code_encryption_cert_expired:notif-encryption-cert-expired}
+ # P0-2.f — proactive 30/14/7/1-day warnings (per Integration Guide §28.3).
+ encryptionCertExpiringSoon: ${topic_code_encryption_cert_expiring_soon:notif-encryption-cert-expiring-soon}
+ signingCertExpiringSoon: ${topic_code_signing_cert_expiring_soon:notif-signing-cert-expiring-soon}
+
+fixedDelay:
+  in:
+    milliseconds:
+      # Cert-expiry warning runs daily (24h). Override per environment if needed.
+      certExpiryWarning: ${cert_expiry_warning_fixed_delay:86400000}
 
 #postgres config
 postgres:
