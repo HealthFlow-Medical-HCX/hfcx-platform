@@ -262,3 +262,82 @@ spec:
     - port: 5601
       targetPort: 5601
   type: LoadBalancer
+
+---
+# P0-8 — Index Lifecycle Management policy for the audit index.
+# Egyptian PDPL Article 9 expects a long audit-trail with documented
+# deletion at end-of-retention. The actual phase durations are POLICY
+# decisions; see compliance/DPIA-HCX-Egypt-v1.md §6 for the values
+# legal/compliance must set. Until those are set, this manifest is
+# inactive (the policy is defined but not bound to the index template).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hcx-audit-ilm-policy
+  namespace: hcx-egypt-prod
+data:
+  hcx-audit-ilm-policy.json: |
+    {
+      "policy": {
+        "phases": {
+          "hot": {
+            "actions": {
+              "rollover": {
+                "max_age":  "TODO_DPIA_SECTION_6_HOT_DAYS",
+                "max_size": "50gb"
+              },
+              "set_priority": { "priority": 100 }
+            }
+          },
+          "warm": {
+            "min_age": "TODO_DPIA_SECTION_6_WARM_AFTER_DAYS",
+            "actions": {
+              "shrink":       { "number_of_shards": 1 },
+              "forcemerge":   { "max_num_segments": 1 },
+              "set_priority": { "priority": 50 }
+            }
+          },
+          "cold": {
+            "min_age": "TODO_DPIA_SECTION_6_COLD_AFTER_DAYS",
+            "actions": {
+              "set_priority": { "priority": 0 }
+            }
+          },
+          "frozen": {
+            "min_age": "TODO_DPIA_SECTION_6_FROZEN_AFTER_DAYS",
+            "actions": {
+              "searchable_snapshot": { "snapshot_repository": "hcx-audit-snapshots" }
+            }
+          },
+          "delete": {
+            "min_age": "TODO_DPIA_SECTION_6_RETENTION_DAYS",
+            "actions": {
+              "delete": {}
+            }
+          }
+        }
+      }
+    }
+---
+# Index template that will bind the ILM policy above to the hcx_audit
+# index pattern. Activated only after DPIA §6 values are set; until then
+# the gateway writes to hcx_audit unmanaged.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hcx-audit-index-template
+  namespace: hcx-egypt-prod
+data:
+  hcx-audit-index-template.json: |
+    {
+      "index_patterns": ["hcx_audit*"],
+      "template": {
+        "settings": {
+          "index.lifecycle.name": "hcx-audit-ilm-policy",
+          "index.lifecycle.rollover_alias": "hcx_audit",
+          "number_of_shards": 3,
+          "number_of_replicas": 1
+        }
+      },
+      "priority": 200
+    }
