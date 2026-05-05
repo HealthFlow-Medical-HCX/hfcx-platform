@@ -112,12 +112,15 @@ public class NotificationService {
         List<String> subscriptions = request.getRecipients();
         ResultSet resultSet = null;
         try {
-            String joined = subscriptions.stream()
-                    .map(plain -> StringUtils.wrap(plain, "'"))
-                    .collect(Collectors.joining(","));
-            String query = String.format("SELECT subscription_id FROM %s WHERE topic_code = '%s' AND sender_code = '%s' AND subscription_status = 'Active' AND subscription_id IN (%s)",
-                    postgresSubscription, request.getTopicCode(), request.getSenderCode(), joined);
-            resultSet = (ResultSet) postgreSQLClient.executeQuery(query);
+            String inPlaceholders = String.join(",", Collections.nCopies(subscriptions.size(), "?"));
+            String query = "SELECT subscription_id FROM " + postgresSubscription
+                    + " WHERE topic_code = ? AND sender_code = ? AND subscription_status = 'Active'"
+                    + " AND subscription_id IN (" + inPlaceholders + ")";
+            List<Object> params = new ArrayList<>();
+            params.add(request.getTopicCode());
+            params.add(request.getSenderCode());
+            params.addAll(subscriptions);
+            resultSet = postgreSQLClient.executeQuery(query, params.toArray());
             while (resultSet.next()) {
                 subscriptions.remove(resultSet.getString(SUBSCRIPTION_ID));
             }
@@ -206,18 +209,22 @@ public class NotificationService {
         else if (request.getPayload().containsKey(IS_DELEGATED) && !(request.getPayload().get(IS_DELEGATED) instanceof Boolean))
             throw new ClientException(ErrorCodes.ERR_INVALID_NOTIFICATION_REQ, IS_DELEGATED_VALUE_IS_INVALID);
         StringBuilder updateProps = new StringBuilder();
-        String selectQuery = String.format("SELECT %s FROM %s WHERE %s = '%s' AND %s = '%s' AND %s = '%s'",
-                SUBSCRIPTION_STATUS, postgresSubscription, SENDER_CODE, request.getSenderCode(), RECIPIENT_CODE,
-                request.getRecipientCode(), TOPIC_CODE, request.getTopicCode());
-        ResultSet selectResult = (ResultSet) postgreSQLClient.executeQuery(selectQuery);
+        String selectQuery = "SELECT " + SUBSCRIPTION_STATUS + " FROM " + postgresSubscription
+                + " WHERE " + SENDER_CODE + " = ? AND " + RECIPIENT_CODE + " = ? AND " + TOPIC_CODE + " = ?";
+        ResultSet selectResult = postgreSQLClient.executeQuery(selectQuery,
+                request.getSenderCode(), request.getRecipientCode(), request.getTopicCode());
         if (selectResult.next()) {
             String prevStatus = selectResult.getString(SUBSCRIPTION_STATUS);
-            formatDBCondition(request, updateProps, ",", "=");
+            List<Object> setValues = formatDBConditionParams(request, updateProps, ",", "=");
             updateProps.deleteCharAt(0);
-            String updateQuery = String.format("UPDATE %s SET %s WHERE %s = '%s' AND %s = '%s' AND %s = '%s' RETURNING %s,%s",
-                    postgresSubscription, updateProps, SENDER_CODE, request.getSenderCode(), RECIPIENT_CODE,
-                    request.getRecipientCode(), TOPIC_CODE, request.getTopicCode(), SUBSCRIPTION_ID, SUBSCRIPTION_STATUS);
-            ResultSet updateResult = (ResultSet) postgreSQLClient.executeQuery(updateQuery);
+            String updateQuery = "UPDATE " + postgresSubscription + " SET " + updateProps
+                    + " WHERE " + SENDER_CODE + " = ? AND " + RECIPIENT_CODE + " = ? AND " + TOPIC_CODE + " = ?"
+                    + " RETURNING " + SUBSCRIPTION_ID + "," + SUBSCRIPTION_STATUS;
+            List<Object> updateParams = new ArrayList<>(setValues);
+            updateParams.add(request.getSenderCode());
+            updateParams.add(request.getRecipientCode());
+            updateParams.add(request.getTopicCode());
+            ResultSet updateResult = postgreSQLClient.executeQuery(updateQuery, updateParams.toArray());
             if (updateResult.next()) {
                 response.setSubscriptionId(updateResult.getString(SUBSCRIPTION_ID));
                 response.setSubscriptionStatus(updateResult.getString(SUBSCRIPTION_STATUS));
@@ -234,12 +241,22 @@ public class NotificationService {
         }
     }
 
-    private void formatDBCondition(Request request, StringBuilder updateProps, String fieldSeparator, String operation) {
+    /**
+     * Builds a parameterized SET / WHERE fragment using {@code ?} placeholders and returns
+     * the list of values to bind. The whitelist {@link Constants#SUBSCRIPTION_UPDATE_PROPS}
+     * controls which payload keys can become column names; values themselves are bound
+     * positionally, never interpolated.
+     */
+    private List<Object> formatDBConditionParams(Request request, StringBuilder updateProps, String fieldSeparator, String operation) {
         updateProps.delete(0, updateProps.length());
+        List<Object> values = new ArrayList<>();
         SUBSCRIPTION_UPDATE_PROPS.forEach(prop -> {
-            if (request.getPayload().containsKey(prop))
-                updateProps.append(fieldSeparator + prop + operation + "'" + request.getPayload().get(prop) + "'");
+            if (request.getPayload().containsKey(prop)) {
+                updateProps.append(fieldSeparator).append(prop).append(operation).append("?");
+                values.add(request.getPayload().get(prop));
+            }
         });
+        return values;
     }
 
     private Map<String, Object> getCData(Request request) {

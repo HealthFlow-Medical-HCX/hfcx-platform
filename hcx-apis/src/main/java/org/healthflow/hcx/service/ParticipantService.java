@@ -130,8 +130,8 @@ public class ParticipantService {
     }
 
     public Map<String, Object> getVerificationStatus(String code) throws Exception {
-        String selectQuery = String.format("SELECT status FROM %s WHERE participant_code ='%s'", onboardOtpTable, code);
-        ResultSet resultSet = (ResultSet) postgreSQLClient.executeQuery(selectQuery);
+        String selectQuery = "SELECT status FROM " + onboardOtpTable + " WHERE participant_code = ?";
+        ResultSet resultSet = postgreSQLClient.executeQuery(selectQuery, code);
         Map<String, Object> responseMap = new HashMap<>();
         while (resultSet.next()) {
             responseMap.put(FORMSTATUS, resultSet.getString("status"));
@@ -140,10 +140,13 @@ public class ParticipantService {
     }
 
     public ParticipantResponse getSponsors(List<Map<String, Object>> participantsList) throws Exception {
-        String primaryEmailList = participantsList.stream().map(participant -> participant.get(PRIMARY_EMAIL)).collect(Collectors.toList()).toString();
-        String primaryEmailWithQuote = getPrimaryEmailWithQuote(primaryEmailList);
-        String selectQuery = String.format("SELECT * FROM %S WHERE applicant_email IN (%s)", onboardingTable, primaryEmailWithQuote);
-        ResultSet resultSet = (ResultSet) postgreSQLClient.executeQuery(selectQuery);
+        List<Object> emails = participantsList.stream()
+                .map(participant -> participant.get(PRIMARY_EMAIL))
+                .collect(Collectors.toList());
+        String inPlaceholders = String.join(",", Collections.nCopies(emails.size(), "?"));
+        String selectQuery = "SELECT * FROM " + onboardingTable
+                + " WHERE applicant_email IN (" + inPlaceholders + ")";
+        ResultSet resultSet = postgreSQLClient.executeQuery(selectQuery, emails.toArray());
         Map<String, Object> sponsorMap = new HashMap<>();
         while (resultSet.next()) {
             Sponsor sponsorResponse = new Sponsor(resultSet.getString(APPLICANT_EMAIL), resultSet.getString(APPLICANT_CODE), resultSet.getString(VERIFIER_CODE), resultSet.getString(FORMSTATUS), resultSet.getLong("createdon"), resultSet.getLong("updatedon"));
