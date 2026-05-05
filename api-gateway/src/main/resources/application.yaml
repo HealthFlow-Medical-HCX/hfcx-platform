@@ -50,6 +50,14 @@ notify:
 timestamp:
   range: ${timestamp_range:10000}
 
+replay:
+  protection:
+    # TTL (seconds) for X-HCX-API-Call-ID idempotency cache. Should be >= timestamp.range
+    # (in seconds) plus a safety margin so a captured request cannot be replayed within
+    # the timestamp window. Default 70 = 10 s window + 60 s safety.
+    ttl: ${REPLAY_PROTECTION_TTL:70}
+    keyPrefix: ${REPLAY_PROTECTION_KEY_PREFIX:hcx:api_call_id:}
+
 allowedEntitiesForForward: ${allowed_entities_for_forward:coverageeligibility, preauth, claim}
 allowedRolesForForward: ${allowed_roles_for_forward:payor, agency.tpa}
 allowedParticipantStatus: ${allowed_participant_status:Active}

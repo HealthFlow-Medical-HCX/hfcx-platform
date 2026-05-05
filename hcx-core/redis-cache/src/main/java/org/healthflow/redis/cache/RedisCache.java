@@ -75,4 +75,31 @@ public class RedisCache {
             return false;
         }
     }
+
+    /**
+     * Atomic set-if-not-exists with a TTL. Used by the gateway's replay-protection
+     * filter to record an X-HCX-API-Call-ID exactly once and reject duplicates without
+     * a TOCTOU window between {@code exists} and {@code setex}.
+     *
+     * <p>Implemented against the Jedis 2.9.x API: {@code SET key value NX EX ttl}.
+     * Returns {@code true} when the key was newly stored, {@code false} when the key
+     * already existed (the caller should treat this as a duplicate).
+     *
+     * @param key        Redis key
+     * @param value      Redis value (typically a constant like {@code "1"})
+     * @param ttlSeconds key expiry in seconds (must be &gt; 0)
+     */
+    public boolean setIfAbsent(String key, String value, int ttlSeconds) throws Exception {
+        Jedis jedis = getConnection();
+        try {
+            String result = jedis.set(key, value, "NX", "EX", ttlSeconds);
+            return "OK".equals(result);
+        } catch (Exception e) {
+            throw new ServerException(ErrorCodes.INTERNAL_SERVER_ERROR,
+                    "Exception occurred while atomic set-if-absent in Redis Cache for Key : "
+                            + key + " | Exception is:" + e);
+        } finally {
+            jedis.close();
+        }
+    }
 }

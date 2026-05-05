@@ -20,6 +20,7 @@ import org.healthflow.apigateway.models.JSONRequest;
 import org.healthflow.apigateway.models.JWERequest;
 import org.healthflow.apigateway.service.AuditService;
 import org.healthflow.apigateway.service.RegistryService;
+import org.healthflow.apigateway.service.ReplayProtectionService;
 import org.healthflow.common.utils.Constants;
 import org.healthflow.common.utils.JSONUtils;
 import org.healthflow.common.utils.JWTUtils;
@@ -50,6 +51,9 @@ public class HCXValidationFilter extends AbstractGatewayFilterFactory<HCXValidat
 
     @Autowired
     RequestHandler requestHandler;
+
+    @Autowired
+    private ReplayProtectionService replayProtectionService;
 
     @Autowired
     private Environment env;
@@ -119,6 +123,7 @@ public class HCXValidationFilter extends AbstractGatewayFilterFactory<HCXValidat
                     requestObj.getPayload().put(RECIPIENTDETAILS, recipientDetails);
                     List<Map<String, Object>> participantCtxAuditDetails = getParticipantCtxAuditData(jweRequest.getHcxSenderCode(), jweRequest.getHcxRecipientCode(), jweRequest.getCorrelationId());
                     jweRequest.validate(getMandatoryHeaders(), subject, timestampRange, senderDetails, recipientDetails, allowedParticipantStatus);
+                    replayProtectionService.checkAndRecord(apiCallId);
                     jweRequest.validateUsingAuditData(allowedEntitiesForForward, allowedRolesForForward, senderDetails, recipientDetails, getCorrelationAuditData(jweRequest.getCorrelationId()), getCallAuditData(jweRequest.getApiCallId()), participantCtxAuditDetails, path);
                     validateParticipantCtxDetails(participantCtxAuditDetails, path);
                 } else if (path.contains(NOTIFICATION_SUBSCRIBE) || path.contains(NOTIFICATION_UNSUBSCRIBE)) { //for validating /notification/subscribe, /notification/unsubscribe
@@ -174,8 +179,10 @@ public class HCXValidationFilter extends AbstractGatewayFilterFactory<HCXValidat
                     requestObj.getPayload().put(RECIPIENTDETAILS,recipientDetails);
                     if (ERROR_RESPONSE.equalsIgnoreCase(jsonRequest.getStatus())) {
                         jsonRequest.validate(getErrorMandatoryHeaders(), subject, timestampRange, senderDetails, recipientDetails, allowedParticipantStatus);
+                        replayProtectionService.checkAndRecord(apiCallId);
                     } else {
                         jsonRequest.validate(getRedirectMandatoryHeaders(), subject, timestampRange, senderDetails, recipientDetails, allowedParticipantStatus);
+                        replayProtectionService.checkAndRecord(apiCallId);
                         if (getApisForRedirect().contains(path)) {
                             if (REDIRECT_STATUS.equalsIgnoreCase(jsonRequest.getStatus()))
                                 jsonRequest.validateRedirect(getRolesForRedirect(), getDetails(jsonRequest.getRedirectTo()), getCallAuditData(jsonRequest.getApiCallId()), getCorrelationAuditData(jsonRequest.getCorrelationId()), allowedParticipantStatus);
