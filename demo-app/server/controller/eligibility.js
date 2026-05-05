@@ -66,7 +66,7 @@ const coverageCheck = async (req, res, next) => {
     });
     var config = {
         method: 'post',
-        url: 'http://a9dd63de91ee94d59847a1225da8b111-273954130.ap-south-1.elb.amazonaws.com:8080/auth/realms/swasth-health-claim-exchange/protocol/openid-connect/token',
+        url: 'http://a9dd63de91ee94d59847a1225da8b111-273954130.ap-south-1.elb.amazonaws.com:8080/auth/realms/hcx-egypt/protocol/openid-connect/token',
         headers: { 
             'content-type': 'application/x-www-form-urlencoded'
         },
