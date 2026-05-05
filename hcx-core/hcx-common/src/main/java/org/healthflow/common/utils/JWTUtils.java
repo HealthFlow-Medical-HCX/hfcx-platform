@@ -1,7 +1,6 @@
 package org.healthflow.common.utils;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.io.IOUtils;
 import org.healthflow.common.exception.ClientException;
 import org.healthflow.common.exception.ErrorCodes;
@@ -53,7 +52,11 @@ public class JWTUtils {
         byte[] privateKeyDecoded = Base64.getDecoder().decode(privateKey);
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(privateKeyDecoded);
         PrivateKey rsaPrivateKey = KeyFactory.getInstance("RSA").generatePrivate(spec);
-        return Jwts.builder().setHeader(headers).setClaims(payload).signWith(SignatureAlgorithm.RS256, rsaPrivateKey).compact();
+        return Jwts.builder()
+                .header().add(headers).and()
+                .claims().add(payload).and()
+                .signWith(rsaPrivateKey, Jwts.SIG.RS256)
+                .compact();
     }
 
     public String generateAuthToken(String privateKey, String sub, String iss, Long expiryTime) throws NoSuchAlgorithmException, InvalidKeySpecException {
