@@ -1,6 +1,6 @@
 package org.swasth.dp.core.util
 
-import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
+import io.jsonwebtoken.Jwts
 import org.swasth.dp.core.job.BaseJobConfig
 
 import java.security.KeyFactory
@@ -27,7 +27,11 @@ class JWTUtil(config: BaseJobConfig) extends Serializable {
     val privateKeyDecoded = Base64.getDecoder.decode(config.privateKey)
     val spec = new PKCS8EncodedKeySpec(privateKeyDecoded)
     val privateKey = KeyFactory.getInstance("RSA").generatePrivate(spec)
-    Jwts.builder.setHeader(headers).setClaims(payload).signWith(SignatureAlgorithm.RS256, privateKey).compact
+    Jwts.builder
+      .header.add(headers).and
+      .claims.add(payload).and
+      .signWith(privateKey, Jwts.SIG.RS256)
+      .compact
   }
 
 }
