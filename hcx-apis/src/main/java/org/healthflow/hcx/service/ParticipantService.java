@@ -18,6 +18,7 @@ import org.healthflow.common.utils.HttpUtils;
 import org.healthflow.common.utils.JSONUtils;
 import org.healthflow.common.utils.JWTUtils;
 import org.healthflow.hcx.handlers.EventHandler;
+import org.healthflow.hcx.utils.validators.EgyptianFieldValidator;
 import org.healthflow.postgresql.IDatabaseService;
 import org.healthflow.redis.cache.RedisCache;
 
@@ -254,6 +255,10 @@ public class ParticipantService {
             if (requestBody.containsKey(SIGNING_CERT_PATH))
                 requestBody.put(SIGNING_CERT_PATH_EXPIRY, jwtUtils.getCertificateExpiry((String) requestBody.get(SIGNING_CERT_PATH)));
         }
+        // P0-4b — Egypt-specific field validation (national_id, IBAN/BIC/Meeza,
+        // mobile, governorate). Runs on both create and update; skips fields that
+        // aren't present.
+        EgyptianFieldValidator.validate(requestBody);
     }
 
     public void validateCertificates(Map<String, Object> requestBody) throws ClientException, CertificateException, IOException {

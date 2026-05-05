@@ -21,6 +21,7 @@ import org.healthflow.common.utils.HttpUtils;
 import org.healthflow.common.utils.JSONUtils;
 import org.healthflow.common.utils.JWTUtils;
 import org.healthflow.hcx.controllers.BaseController;
+import org.healthflow.hcx.utils.validators.EgyptianFieldValidator;
 import org.healthflow.postgresql.IDatabaseService;
 
 import java.security.NoSuchAlgorithmException;
@@ -119,6 +120,9 @@ public class ParticipantService extends BaseController {
 
     private void createParticipantAndSendOTP(HttpHeaders headers, OnboardRequest request, Map<String, Object> output) throws Exception {
         Map<String, Object> participant = request.getParticipant();
+        // P0-4b — fail fast on Egyptian field validation before any registry round-trip
+        // (hcx-apis re-validates as the security boundary; this is the convenience check).
+        EgyptianFieldValidator.validate(participant);
         participant.put(ENDPOINT_URL, "http://testurl/v0.7");
         participant.put(ENCRYPTION_CERT, "https://raw.githubusercontent.com/Swasth-Digital-Health-Foundation/hcx-platform/sprint-27/hcx-apis/src/test/resources/examples/x509-self-signed-certificate.pem");
         participant.put(REGISTRY_STATUS, CREATED);
