@@ -1,5 +1,6 @@
 {
    "$schema":"http://json-schema.org/draft-07/schema",
+   "$id":"https://schemas.healthflow.eg/registry/Organisation.json",
    "type":"object",
    "properties":{
       "Organisation":{
@@ -14,7 +15,7 @@
       "Organisation":{
          "$id":"#/definitions/Organisation",
          "type":"object",
-         "title":"The Organisation Schema",
+         "title":"The Organisation Schema (HealthFlow Egypt)",
          "required":[
             "participant_code",
             "participant_name",
@@ -35,7 +36,18 @@
                "type":"array",
                "items":{
                   "type":"string",
-                  "enum" :["provider", "payor", "agency.tpa", "agency.regulator", "research", "member.isnp", "agency.sponsor", "HIE/HIO.HCX"]
+                  "enum":[
+                     "provider",
+                     "payor",
+                     "agency.tpa",
+                     "agency.bsp",
+                     "agency.regulator.fra",
+                     "agency.regulator.mohp",
+                     "agency.regulator.eda",
+                     "research",
+                     "agency.sponsor",
+                     "hie.healthflow"
+                  ]
                }
             },
             "linked_registry_codes":{
@@ -46,10 +58,15 @@
             },
             "scheme_code":{
                "type":"string",
-               "default": "default"
+               "default":"default"
             },
             "address":{
                "$ref":"#/definitions/address"
+            },
+            "national_id":{
+               "type":"string",
+               "pattern":"^[0-9]{14}$",
+               "description":"Egyptian National ID of the legal-entity owner / authorized signatory. 14 digits. The EgyptianNationalIDValidator additionally enforces governorate-code prefix and the Luhn checksum at the API layer (P0-4b)."
             },
             "primary_email":{
                "type":"string",
@@ -103,30 +120,34 @@
             },
             "payment_details":{
                "type":"object",
-               "required":[
-
-               ],
+               "description":"Egyptian banking identifiers. Provide either an IBAN+BIC pair (for inter-bank transfers) or a Meeza wallet card number (for retail payouts).",
                "properties":{
-                  "upi_id":{
-                     "type":"string"
+                  "iban":{
+                     "type":"string",
+                     "pattern":"^EG[0-9]{27}$",
+                     "description":"Egyptian IBAN, 29 characters: 'EG' followed by 27 digits. Mod-97 checksum is enforced by the EgyptianIBANValidator at the API layer."
                   },
-                  "account_number":{
-                     "type":"string"
+                  "bic":{
+                     "type":"string",
+                     "pattern":"^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$",
+                     "description":"ISO 9362 Bank Identifier Code (SWIFT). 8 or 11 characters."
                   },
-                  "ifsc_code":{
-                     "type":"string"
+                  "meeza_card":{
+                     "type":"string",
+                     "pattern":"^[0-9]{16}$",
+                     "description":"Meeza wallet card number, 16 digits."
                   }
                },
                "oneOf":[
                   {
                      "required":[
-                        "upi_id"
+                        "iban",
+                        "bic"
                      ]
                   },
                   {
                      "required":[
-                        "account_number",
-                        "ifsc_code"
+                        "meeza_card"
                      ]
                   }
                ]
@@ -135,11 +156,14 @@
       },
       "address":{
          "type":"object",
+         "description":"Egyptian street address. Postal code follows the 5-digit Egyptian system; the governorate field must be one of the 27 official governorates and stays in sync with the EgyptianGovernorate enum at the API layer. additionalProperties is disabled so that legacy locale-specific fields from the upstream schema cannot be smuggled in via the registry write path.",
+         "additionalProperties":false,
          "required":[
-
+            "governorate",
+            "postal_code"
          ],
          "properties":{
-            "plot":{
+            "building":{
                "type":"string"
             },
             "street":{
@@ -148,32 +172,65 @@
             "landmark":{
                "type":"string"
             },
-            "village":{
-               "type":"string"
+            "shiakha":{
+               "type":"string",
+               "description":"Neighborhood / shiakha"
             },
-            "district":{
-               "type":"string"
+            "markaz":{
+               "type":"string",
+               "description":"Markaz (district / sub-governorate administrative division)"
             },
-            "state":{
-               "type":"string"
+            "governorate":{
+               "type":"string",
+               "enum":[
+                  "Cairo",
+                  "Giza",
+                  "Alexandria",
+                  "Qalyubia",
+                  "Port Said",
+                  "Suez",
+                  "Ismailia",
+                  "Dakahlia",
+                  "Sharqia",
+                  "Gharbia",
+                  "Monufia",
+                  "Beheira",
+                  "Kafr El Sheikh",
+                  "Damietta",
+                  "Fayoum",
+                  "Beni Suef",
+                  "Minya",
+                  "Asyut",
+                  "Sohag",
+                  "Qena",
+                  "Aswan",
+                  "Luxor",
+                  "Red Sea",
+                  "New Valley",
+                  "Matrouh",
+                  "North Sinai",
+                  "South Sinai"
+               ]
             },
-            "pincode":{
-               "type":"string"
+            "postal_code":{
+               "type":"string",
+               "pattern":"^[0-9]{5}$"
             }
          }
       }
    },
    "_osConfig":{
-      "ownershipAttributes": [
+      "ownershipAttributes":[
          {
-            "email": "/primary_email",
-            "mobile": "/primary_mobile",
-            "userId": "/primary_email"
+            "email":"/primary_email",
+            "mobile":"/primary_mobile",
+            "userId":"/primary_email"
          }
       ],
       "uniqueIndexFields":[
          "participant_code",
-         "primary_email"
+         "primary_email",
+         "national_id"
       ]
    }
 }
