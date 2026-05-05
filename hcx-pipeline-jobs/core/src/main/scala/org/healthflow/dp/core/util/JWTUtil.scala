@@ -15,7 +15,7 @@ class JWTUtil(config: BaseJobConfig) extends Serializable {
     val headers = new util.HashMap[String, AnyRef]()
     headers.put(Constants.TYP, Constants.JWT)
     val payload = new util.HashMap[String, AnyRef]()
-    payload.put(Constants.JTI, UUID.randomUUID())
+    payload.put(Constants.JTI, UUID.randomUUID().toString)
     payload.put(Constants.ISS, config.hcxRegistryCode)
     payload.put(Constants.SUB, config.hcxRegistryCode)
     payload.put(Constants.IAT, date)

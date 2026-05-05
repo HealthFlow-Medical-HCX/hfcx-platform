@@ -64,7 +64,7 @@ public class JWTUtils {
         Map<String, Object> headers = new HashMap<>();
         headers.put(TYPE, JWT);
         Map<String, Object> payload = new HashMap<>();
-        payload.put(JTI, UUID.randomUUID());
+        payload.put(JTI, UUID.randomUUID().toString());
         payload.put(SUB, sub);
         payload.put(ISS, iss);
         payload.put(IAT, date);

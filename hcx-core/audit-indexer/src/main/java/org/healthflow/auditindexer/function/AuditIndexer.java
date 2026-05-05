@@ -47,4 +47,28 @@ public class AuditIndexer {
         return getClass().getClassLoader().getResourceAsStream(filename);
     }
 
+    /**
+     * Deletes every audit document referencing the given participant — both as
+     * sender and as recipient. Used by the right-to-erasure admin endpoint
+     * (P0-8) so the audit-index scrub completes immediately rather than relying
+     * solely on the ILM policy's eventual age-out.
+     *
+     * <p>Hits the audit alias (which spans every weekly index since onboarding),
+     * not a single index, so a participant whose history reaches back years is
+     * fully scrubbed in one call.
+     *
+     * @param participantCode the HCX participant code being erased
+     * @return total documents deleted (sender-side + recipient-side)
+     */
+    public long deleteByParticipantCode(String participantCode) throws Exception {
+        if (participantCode == null || participantCode.trim().isEmpty()) return 0L;
+        long sent = esUtil.deleteByQuery(auditAlias, "sender_code", participantCode);
+        long received = esUtil.deleteByQuery(auditAlias, "recipient_code", participantCode);
+        long total = sent + received;
+        logger.info("Audit erasure for participant " + participantCode
+                + ": deleted " + sent + " as sender + " + received + " as recipient = "
+                + total + " total");
+        return total;
+    }
+
 }

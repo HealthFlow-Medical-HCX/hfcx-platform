@@ -83,6 +83,29 @@ public class PostgreSQLClient implements IDatabaseService {
     }
 
     /**
+     * Parameter-bound INSERT / UPDATE / DELETE that returns the affected-row
+     * count (which {@link #execute(String, Object...)} cannot, since
+     * {@link PreparedStatement#execute()} returns a boolean indicating result-set
+     * presence rather than a count).
+     *
+     * <p>Use this overload from retention / erasure code paths that need to
+     * report or audit the number of rows touched. Same SQL-injection-safe
+     * binding as the other parameterized overloads.
+     *
+     * @param sql    SQL with {@code ?} positional placeholders
+     * @param params values to bind, in placeholder order
+     * @return the affected-row count from {@link PreparedStatement#executeUpdate()}
+     */
+    public int executeUpdate(String sql, Object... params) throws ClientException {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            bindParams(ps, params);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new ClientException("Error while performing parameterized database update: " + e.getMessage());
+        }
+    }
+
+    /**
      * Execute a parameterized SELECT via {@link PreparedStatement} and return its
      * {@link ResultSet}.
      *

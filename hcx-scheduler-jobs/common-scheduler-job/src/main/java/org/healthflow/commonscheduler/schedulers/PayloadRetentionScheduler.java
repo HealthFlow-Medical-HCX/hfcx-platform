@@ -97,19 +97,15 @@ public class PayloadRetentionScheduler extends BaseScheduler {
      * Marks payload rows older than the retention threshold as PURGED. Rows that
      * are already PURGED are left untouched; that's how the grace window is
      * preserved (the lastupdatedon of a PURGED row is the soft-delete time).
+     *
+     * @return the affected-row count from {@link IDatabaseService#executeUpdate}
      */
     private int softDelete(long retentionThreshold, long now) {
         String sql = "UPDATE " + payloadTable
                 + " SET status = ?, lastupdatedon = ? "
                 + " WHERE status <> ? AND lastupdatedon < ?";
         try {
-            // PostgreSQLClient.execute returns true/false from Statement.execute;
-            // the affected-row count needs an executeUpdate-style call, which the
-            // current client wrapper does not expose. For now we run the UPDATE
-            // and report a placeholder count; a follow-up should add an
-            // executeUpdate(sql, params) overload returning int.
-            postgreSQLClient.execute(sql, STATUS_PURGED, now, STATUS_PURGED, retentionThreshold);
-            return -1; // -1 = "ran but count not available"; see TODO above
+            return postgreSQLClient.executeUpdate(sql, STATUS_PURGED, now, STATUS_PURGED, retentionThreshold);
         } catch (Exception e) {
             logger.error("Payload retention soft-delete failed: {}", e.getMessage(), e);
             return 0;
@@ -125,8 +121,7 @@ public class PayloadRetentionScheduler extends BaseScheduler {
         String sql = "DELETE FROM " + payloadTable
                 + " WHERE status = ? AND lastupdatedon < ?";
         try {
-            postgreSQLClient.execute(sql, STATUS_PURGED, graceThreshold);
-            return -1; // see soft-delete TODO
+            return postgreSQLClient.executeUpdate(sql, STATUS_PURGED, graceThreshold);
         } catch (Exception e) {
             logger.error("Payload retention hard-delete failed: {}", e.getMessage(), e);
             return 0;
