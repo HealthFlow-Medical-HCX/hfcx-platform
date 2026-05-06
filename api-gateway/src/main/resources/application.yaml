@@ -62,6 +62,12 @@ jwt:
   jwkUrl: ${JWT_JWK_URL:http://hcx-keycloak.healthflow.local:8080/auth/realms/hcx-egypt/protocol/openid-connect/certs}
   claimsNamespacePath: ${JWT_NS_PATH:$.realm_access.roles}
 
+# Keycloak base URL for the /auth/token route per Integration Guide §14.3.
+# The gateway proxies /auth/token to ${keycloak.baseUrl}/realms/${keycloak.realm}/protocol/openid-connect/token.
+keycloak:
+  baseUrl: ${KEYCLOAK_BASE_URL:http://hcx-keycloak.healthflow.local:8080/auth}
+  realm: ${KEYCLOAK_REALM:hcx-egypt}
+
 redis:
   host: ${REDIS_HOST:localhost}
   port: ${REDIS_PORT:6379}
@@ -192,3 +198,14 @@ spring:
             - RewritePath=/${version.external1}/applicant/(?<segment>/?.*), /${version.internal}/applicant/$\{segment}
           predicates:
             - Path=/${version.external07}/participant/verify, /${version.external07}/participant/verify/identity, /${version.external07}/participant/otp/send, /${version.external07}/participant/onboard/update, /${version.external07}/applicant/getinfo, /${version.external07}/applicant/verify, /${version.external1}/participant/verify, /${version.external1}/participant/verify/identity, /${version.external1}/participant/otp/send, /${version.external1}/participant/onboard/update, /${version.external1}/applicant/getinfo, /${version.external1}/applicant/verify
+
+        # Gap 10 v1.2 — /auth/token proxy to Keycloak. Per Integration Guide §14.3,
+        # integrators POST client_credentials to /auth/token and receive a Keycloak
+        # JWT. The route is unauthenticated by design (it IS the auth endpoint).
+        - id: keycloak-token-route
+          uri: ${keycloak.baseUrl}
+          filters:
+            - RewritePath=/auth/token, /realms/${keycloak.realm}/protocol/openid-connect/token
+          predicates:
+            - Path=/auth/token
+            - Method=POST

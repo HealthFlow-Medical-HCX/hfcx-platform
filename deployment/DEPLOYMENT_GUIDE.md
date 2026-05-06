@@ -830,3 +830,61 @@ The provided Nginx configuration (`nginx-hcx-portals.conf`) includes:
 - **Path-Based Routing**: Allows access to all portals via a single IP address and different paths (e.g., `/beneficiary/`, `/opd/`).
 
 ---
+
+## Environment variables
+
+`docker-compose-egypt.yml` resolves credentials from environment variables
+rather than baking them into the file. The repository ships an
+`.env.example` next to the compose file documenting every required and
+optional variable.
+
+```bash
+cd deployment
+cp .env.example .env
+$EDITOR .env            # set POSTGRES_USER, POSTGRES_PASSWORD, etc.
+docker compose -f docker-compose-egypt.yml up -d
+```
+
+Variables marked `${VAR:?...}` in the compose file are mandatory — Compose
+refuses to start if they are unset, which prevents accidentally booting
+Postgres with default credentials. The same `POSTGRES_USER` /
+`POSTGRES_PASSWORD` pair is consumed by `hcx-postgres` (server bootstrap),
+`hcx-keycloak` (KC_DB_USERNAME / KC_DB_PASSWORD), and `hcx-api` — keep
+them in sync.
+
+Never commit `.env` to git. The `.env.example` template is safe to commit
+because every secret is a placeholder.
+
+---
+
+## TLS certificates
+
+The Nginx configuration serves the platform under the `healthflow.gov.eg`
+zone. Each frontend has its own subdomain so cookies, CORS, and CSP rules
+stay scoped per app. Before requesting certificates, create the following
+public DNS records pointing at the cluster ingress (or single host running
+Nginx):
+
+| Record | Type | Target |
+|---|---|---|
+| `healthflow.gov.eg`             | A | ingress IP |
+| `sandbox.healthflow.gov.eg`     | A | ingress IP |
+| `beneficiary.healthflow.gov.eg` | A | ingress IP |
+| `opd.healthflow.gov.eg`         | A | ingress IP |
+| `bsp.healthflow.gov.eg`         | A | ingress IP |
+| `payer.healthflow.gov.eg`       | A | ingress IP |
+
+Once DNS resolves, install `cert-manager` in the cluster and apply the
+sample ClusterIssuer shipped in this repository:
+
+```bash
+kubectl apply -f k8s/cert-manager/letsencrypt-prod.yaml
+```
+
+The included issuer uses the ACME HTTP-01 challenge, which only needs the
+A records above plus port 80 reachable from the public internet —
+cert-manager will provision and renew certificates automatically. For
+private clusters, switch to DNS-01 by adding a `solvers.dns01` block with
+your DNS provider's credentials (see the cert-manager docs).
+
+---

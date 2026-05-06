@@ -22,6 +22,12 @@ aws:
   accessSecret: ${aws_accessSecret:}
   region: ${aws_region:}
 
+sms:
+  cequens:
+    baseUrl: ${SMS_CEQUENS_BASE_URL:https://apis.cequens.com/sms/v1}
+    senderId: ${SMS_CEQUENS_SENDER_ID:HEALTHFLOW}
+    bearerToken: ${SMS_CEQUENS_BEARER_TOKEN:}
+
 onboarding:
   successURL: ${onboarding_success_url:}
 

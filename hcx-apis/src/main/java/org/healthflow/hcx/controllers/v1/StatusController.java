@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.healthflow.common.response.ResponseMessage.CORRELATION_ID_MISSING;
 import static org.healthflow.common.response.ResponseMessage.INVALID_STATUS_SEARCH_ENTITY;
 import static org.healthflow.common.utils.Constants.*;
@@ -29,14 +32,22 @@ import static org.healthflow.common.utils.Constants.*;
 @RequestMapping(Constants.VERSION_PREFIX)
 public class StatusController extends BaseController {
 
+    private static final Logger LEGACY_LOG = LoggerFactory.getLogger(StatusController.class);
+
     @Value("${kafka.topic.status}")
     private String topic;
 
     @Value("${allowedEntitiesForStatusSearch}")
     private List<String> allowedEntitiesForStatusSearch;
 
-    @PostMapping(HCX_STATUS)
-    public ResponseEntity<Object> status(@RequestBody Map<String, Object> requestBody) throws Exception {
+    @PostMapping({HCX_STATUS, STATUS_REQUEST})
+    public ResponseEntity<Object> status(@RequestBody Map<String, Object> requestBody,
+                                         org.springframework.web.context.request.WebRequest webRequest) throws Exception {
+        if (webRequest != null && webRequest.getDescription(false) != null
+                && webRequest.getDescription(false).contains(HCX_STATUS)) {
+            LEGACY_LOG.warn("Deprecated path '{}{}' was called; migrate to '{}{}' per Integration Guide §28.",
+                    Constants.VERSION_PREFIX, HCX_STATUS, Constants.VERSION_PREFIX, STATUS_REQUEST);
+        }
         Request request = new Request(requestBody, HCX_STATUS);
         Response response = new Response(request);
         try {
@@ -66,8 +77,14 @@ public class StatusController extends BaseController {
         }
     }
 
-    @PostMapping(HCX_ONSTATUS)
-    public ResponseEntity<Object> onStatus(@RequestBody Map<String, Object> requestBody) throws Exception {
+    @PostMapping({HCX_ONSTATUS, STATUS_ONREQUEST})
+    public ResponseEntity<Object> onStatus(@RequestBody Map<String, Object> requestBody,
+                                           org.springframework.web.context.request.WebRequest webRequest) throws Exception {
+        if (webRequest != null && webRequest.getDescription(false) != null
+                && webRequest.getDescription(false).contains(HCX_ONSTATUS)) {
+            LEGACY_LOG.warn("Deprecated path '{}{}' was called; migrate to '{}{}' per Integration Guide §28.",
+                    Constants.VERSION_PREFIX, HCX_ONSTATUS, Constants.VERSION_PREFIX, STATUS_ONREQUEST);
+        }
         Request request = new Request(requestBody, HCX_ONSTATUS);
         Response response = new Response(request);
         try {

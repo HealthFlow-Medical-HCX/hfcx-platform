@@ -26,8 +26,16 @@ public class Constants {
     public static final String PAYMENT_NOTICE_ONREQUEST = "/paymentnotice/on_request";
 
     //Status Search APIs
+    /** @deprecated use {@link #STATUS_REQUEST} per Integration Guide §28 (Gap 6 v1.2). */
+    @Deprecated
     public static final String HCX_STATUS = "/hcx/status";
+    /** @deprecated use {@link #STATUS_ONREQUEST} per Integration Guide §28 (Gap 6 v1.2). */
+    @Deprecated
     public static final String HCX_ONSTATUS = "/hcx/on_status";
+    /** Documented status request path per Integration Guide §28. */
+    public static final String STATUS_REQUEST = "/status/request";
+    /** Documented status response path per Integration Guide §28. */
+    public static final String STATUS_ONREQUEST = "/status/on_request";
 
     // Search APIs
     public static final String HCX_SEARCH = "/hcx/search";

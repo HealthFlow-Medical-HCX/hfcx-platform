@@ -1,50 +1,70 @@
 package org.healthflow.hcx.services;
 
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
-import org.springframework.beans.factory.annotation.Value;
+import org.healthflow.hcx.services.sms.SmsGateway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Thin facade over the active {@link SmsGateway} implementation.
+ *
+ * <p>Spring resolves the right gateway per active profile:
+ * <ul>
+ *   <li>{@code egypt}, {@code prod}, {@code staging} -&gt; CEQUENS</li>
+ *   <li>{@code aws-fallback}, {@code dev}, {@code test} -&gt; AWS SNS</li>
+ * </ul>
+ *
+ * <p>Public method signatures are preserved so that callers
+ * (e.g. {@code ParticipantService}) remain unchanged.
+ */
 @Service
 public class SMSService {
 
-    @Value("${aws.accessKey}")
-    private String accessKey;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SMSService.class);
 
-    @Value("${aws.accessSecret}")
-    private String accessSecret;
+    private final SmsGateway gateway;
 
-    @Value("${aws.region}")
-    private String awsRegion;
+    @Autowired
+    public SMSService(SmsGateway gateway) {
+        this.gateway = gateway;
+    }
 
+    /**
+     * Send an arbitrary SMS via the configured gateway.
+     *
+     * @param phoneNumber the recipient phone number, including country code
+     * @param message     the SMS body
+     * @throws Exception if the carrier rejects the message
+     */
+    public void send(String phoneNumber, String message) throws Exception {
+        gateway.send(phoneNumber, message);
+    }
+
+    /**
+     * Send an OTP SMS to the given mobile number. Preserved signature for
+     * existing callers ({@code ParticipantService}, etc.).
+     *
+     * <p>Phone numbers are prefixed with {@code +91} to match the legacy
+     * AWS SNS implementation.
+     */
     @Async
     public CompletableFuture<String> sendOTP(String phone, String phoneOtp) {
-        String message = "HCX mobile verification code is:" +phoneOtp;
-        String phoneNumber = "+91"+ phone;  // Ex: +91XXX4374XX
-        AmazonSNS snsClient = AmazonSNSClient.builder().withCredentials(new AWSCredentialsProvider() {
-            @Override
-            public AWSCredentials getCredentials() {
-                return new BasicAWSCredentials(accessKey, accessSecret);
-            }
-
-            @Override
-            public void refresh() {
-
-            }
-        }).withRegion(awsRegion).build();
-
-        PublishResult result = snsClient.publish(new PublishRequest()
-                .withMessage(message)
-                .withPhoneNumber(phoneNumber));
-        return CompletableFuture.completedFuture(result.getMessageId());
+        String message = "HCX mobile verification code is:" + phoneOtp;
+        String phoneNumber = "+91" + phone; // Ex: +91XXX4374XX
+        try {
+            gateway.send(phoneNumber, message);
+            LOGGER.debug("OTP SMS dispatched via gateway={}", gateway.name());
+            return CompletableFuture.completedFuture("sent");
+        } catch (Exception e) {
+            LOGGER.error("OTP SMS dispatch failed via gateway={}: {}", gateway.name(), e.getMessage());
+            CompletableFuture<String> failed = new CompletableFuture<>();
+            failed.completeExceptionally(e);
+            return failed;
+        }
     }
 }
