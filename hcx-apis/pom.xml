@@ -138,6 +138,44 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring.version}</version>
 			</plugin>
+			<!--
+			  Gap N2 v1.3 — bundle the Egyptian FHIR IG package.tgz into the
+			  classpath so FhirValidationService.attachIgPackageIfAvailable()
+			  can load the profiles at runtime. Without this step the IG path
+			  resolves to a missing classpath resource and FHIR validation
+			  silently falls back to base R4, leaving Egyptian profile
+			  constraints inert.
+
+			  The package.tgz must be built first by tools/build-fhir-ig.sh
+			  (or the FHIR-IG-Build CI workflow) — this antrun step copies
+			  the artifact, it does not generate it. fail-fast if missing.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>copy-fhir-ig-package</id>
+						<phase>generate-resources</phase>
+						<configuration>
+							<target>
+								<mkdir dir="${project.build.outputDirectory}/fhir"/>
+								<available file="${project.basedir}/../fhir/egyptian-ig/output/package.tgz"
+								           property="fhir.ig.exists"/>
+								<fail unless="fhir.ig.exists">
+FHIR IG package not found at fhir/egyptian-ig/output/package.tgz.
+Build it first with: bash tools/build-fhir-ig.sh
+Or in CI: ensure the "Build Egyptian FHIR IG" step ran before this one.
+								</fail>
+								<copy file="${project.basedir}/../fhir/egyptian-ig/output/package.tgz"
+								      tofile="${project.build.outputDirectory}/fhir/egyptian-ig.tgz"/>
+							</target>
+						</configuration>
+						<goals><goal>run</goal></goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
