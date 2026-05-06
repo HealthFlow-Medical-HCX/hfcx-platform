@@ -45,6 +45,21 @@ public class FhirConfiguration {
         Path resolved = resolvePackagePath(igPackagePath);
         logger.info("FhirValidationService bean: enabled={}, igPackagePath={}, resolved={}",
                 enabled, igPackagePath, resolved);
+        if (enabled && resolved == null) {
+            // Gap N2 v1.3 — promoted from WARN to startup error. If validation
+            // is enabled but the IG package can't be loaded, Egyptian profile
+            // constraints would silently fall back to base R4 (i.e. inert).
+            // Refuse to start so the misconfiguration surfaces in deploy logs
+            // rather than as profile drift in the wild.
+            logger.error("FHIR validation is enabled but the IG package could not be loaded "
+                    + "from '{}'. Egyptian profile constraints will NOT be enforced. "
+                    + "Refusing to start. Build the IG with `bash tools/build-fhir-ig.sh` "
+                    + "before packaging hcx-apis, or set FHIR_VALIDATION_ENABLED=false.",
+                    igPackagePath);
+            throw new IllegalStateException(
+                    "FHIR IG package missing at " + igPackagePath
+                            + " while fhir.validation.enabled=true");
+        }
         return new FhirValidationService(enabled, resolved);
     }
 

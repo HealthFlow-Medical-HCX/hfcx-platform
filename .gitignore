@@ -15,3 +15,9 @@
 # Maven shade plugin generates dependency-reduced-pom.xml as build output;
 # never commit (Gap 22 v1.2 remediation).
 **/dependency-reduced-pom.xml
+
+# FHIR IG build outputs — also covered by fhir/egyptian-ig/.gitignore but
+# duplicated here as defense in depth (Gap N2 v1.3 remediation).
+fhir/egyptian-ig/output/
+fhir/egyptian-ig/fsh-generated/
+fhir/egyptian-ig/input-cache/

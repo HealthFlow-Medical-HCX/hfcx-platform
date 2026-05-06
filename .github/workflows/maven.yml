@@ -20,6 +20,15 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+      # Gap N2 v1.3 — produce fhir/egyptian-ig/output/package.tgz so the
+      # hcx-apis maven-antrun step can bundle it into the runtime classpath.
+      # Without this, mvn -B verify fails with the documented error.
+      - name: Set up Node.js (for SUSHI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build Egyptian FHIR IG
+        run: bash tools/build-fhir-ig.sh
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
