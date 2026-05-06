@@ -186,7 +186,8 @@ jobs:
         env:
           REACT_APP_API_URL: https://dev-hcx.healthflow.eg/api
           REACT_APP_KEYCLOAK_URL: https://auth.dev-hcx.healthflow.eg
-          REACT_APP_KEYCLOAK_REALM: healthflow-hcx-egypt
+          # Must match deployment/keycloak/hcx-egypt-realm.json (Gap V3 v1.4).
+          REACT_APP_KEYCLOAK_REALM: hcx-egypt
         run: npm run build
 
       - name: Upload build artifact

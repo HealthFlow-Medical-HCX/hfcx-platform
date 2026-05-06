@@ -70,7 +70,12 @@ spring:
 # Keycloak configuration (credentials from Vault)
 keycloak:
   auth-server-url: https://auth.healthflow.eg/auth
-  realm: healthflow-hcx-egypt
+  # Realm name MUST match deployment/keycloak/hcx-egypt-realm.json's
+  # "realm": "hcx-egypt" field. Was incorrectly set to
+  # 'healthflow-hcx-egypt' before Gap V3 v1.4 — the JWK URL would
+  # 404 on every authenticated request and Keycloak admin would
+  # reject the realm lookup.
+  realm: hcx-egypt
   resource: hcx-gateway
   credentials:
     secret: ${vault.keycloak.client-secret}
