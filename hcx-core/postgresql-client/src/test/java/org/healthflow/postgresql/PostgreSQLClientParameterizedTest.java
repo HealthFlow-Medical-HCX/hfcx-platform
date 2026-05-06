@@ -100,7 +100,10 @@ public class PostgreSQLClientParameterizedTest {
     public void executeWithNoParametersStillBindsCorrectlyAndDoesNotInjectAny() throws Exception {
         when(mockPreparedStatement.execute()).thenReturn(true);
 
-        boolean ok = client.execute("SELECT 1");
+        // Force resolution to the varargs overload by passing an explicit empty
+        // Object[] — Java would otherwise pick the deprecated execute(String) method
+        // which uses the shared Statement, not a PreparedStatement.
+        boolean ok = client.execute("SELECT 1", new Object[]{});
 
         assertTrue(ok);
         verify(mockConnection).prepareStatement("SELECT 1");
@@ -164,5 +167,53 @@ public class PostgreSQLClientParameterizedTest {
         verify(mockConnection).prepareStatement(
                 eq("DELETE FROM onboarding WHERE applicant_email = ?"));
         verify(mockConnection, times(1)).prepareStatement(org.mockito.ArgumentMatchers.anyString());
+    }
+
+    // ----- executeUpdate overload (cleanup-batch follow-up) -----
+
+    @Test
+    public void executeUpdateReturnsAffectedRowCount() throws Exception {
+        when(mockPreparedStatement.executeUpdate()).thenReturn(7);
+
+        int rows = client.executeUpdate(
+                "UPDATE payload SET status = ? WHERE lastupdatedon < ?",
+                "PURGED", 1700000000000L);
+
+        assertEquals(7, rows);
+        verify(mockConnection).prepareStatement(
+                "UPDATE payload SET status = ? WHERE lastupdatedon < ?");
+        verify(mockPreparedStatement).setObject(1, "PURGED");
+        verify(mockPreparedStatement).setObject(2, 1700000000000L);
+        verify(mockPreparedStatement).executeUpdate();
+        // Must close the PreparedStatement once the count is read — no result set
+        // to keep open, unlike executeQuery.
+        verify(mockPreparedStatement, atLeastOnce()).close();
+    }
+
+    @Test
+    public void executeUpdateBindsAllParametersAndZeroAffectedRows() throws Exception {
+        when(mockPreparedStatement.executeUpdate()).thenReturn(0);
+
+        int rows = client.executeUpdate(
+                "DELETE FROM payload WHERE status = ? AND lastupdatedon < ?",
+                "PURGED", 0L);
+
+        assertEquals(0, rows);
+        verify(mockPreparedStatement).setObject(1, "PURGED");
+        verify(mockPreparedStatement).setObject(2, 0L);
+        verify(mockPreparedStatement).executeUpdate();
+    }
+
+    @Test
+    public void executeUpdateWrapsSqlExceptionAsClientException() throws Exception {
+        when(mockPreparedStatement.executeUpdate())
+                .thenThrow(new SQLException("permission denied for table payload"));
+
+        try {
+            client.executeUpdate("DELETE FROM payload WHERE id = ?", 42);
+            fail("expected ClientException");
+        } catch (ClientException e) {
+            assertTrue(e.getMessage().contains("permission denied"));
+        }
     }
 }

@@ -12,6 +12,9 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 
 import java.io.IOException;
 import java.util.Map;
@@ -78,5 +81,29 @@ public class ElasticSearchUtil {
                  throw new Exception("ElasticSearchUtil :: Error while closing elastic search connection : " + e.getMessage());
              }
      }
+
+    /**
+     * Deletes every document in {@code indexPattern} whose {@code fieldName}
+     * matches {@code fieldValue} exactly (term-level match — no tokenisation
+     * surprises on participant codes). Refreshes the index on completion so
+     * subsequent reads see the deletion immediately.
+     *
+     * <p>Used by the right-to-erasure endpoint (P0-8) via
+     * {@link org.healthflow.auditindexer.function.AuditIndexer#deleteByParticipantCode}.
+     *
+     * @return the count of documents deleted, as reported by Elasticsearch
+     */
+    public long deleteByQuery(String indexPattern, String fieldName, String fieldValue) throws Exception {
+        try {
+            DeleteByQueryRequest req = new DeleteByQueryRequest(indexPattern);
+            req.setQuery(QueryBuilders.termQuery(fieldName, fieldValue));
+            req.setRefresh(true);
+            BulkByScrollResponse resp = esClient.deleteByQuery(req, RequestOptions.DEFAULT);
+            return resp.getDeleted();
+        } catch (Exception e) {
+            throw new Exception("ElasticSearchUtil :: Error while deleting documents from "
+                    + indexPattern + " where " + fieldName + " = " + fieldValue + " : " + e.getMessage());
+        }
+    }
 
 }

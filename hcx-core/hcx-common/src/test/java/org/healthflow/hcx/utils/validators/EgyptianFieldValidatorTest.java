@@ -33,7 +33,10 @@ public class EgyptianFieldValidatorTest {
     private static final String VALID_MEEZA = "5061111122223333";
 
     private static String computeValidNationalId() {
-        String body = "2" + "1980" + "05" + "15" + "01" + "234"; // 13 digits
+        // EgyptianNationalIDValidator's substring offsets parse positions 0..12 as
+        // the body (13 chars): 1 century + 4 year + 2 month + 2 day + 2 governorate
+        // + 2 sequence = 13. The 14th char is the Luhn check computed below.
+        String body = "2" + "1980" + "05" + "15" + "01" + "23"; // 13 digits
         int sum = 0;
         for (int i = 0; i < 13; i++) {
             int digit = Character.getNumericValue(body.charAt(i));

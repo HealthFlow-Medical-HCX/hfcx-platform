@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.healthflow.auditindexer.function.AuditIndexer;
 import org.healthflow.common.dto.Response;
 import org.healthflow.common.exception.ClientException;
 import org.healthflow.common.exception.ErrorCodes;
@@ -65,6 +66,9 @@ public class AdminErasureController extends BaseController {
     @Autowired
     private IDatabaseService postgreSQLClient;
 
+    @Autowired
+    private AuditIndexer auditIndexer;
+
     @PostMapping("/participant/{participantCode}/erase")
     public ResponseEntity<Object> erase(
             @RequestHeader HttpHeaders header,
@@ -90,11 +94,23 @@ public class AdminErasureController extends BaseController {
             int onboardingRows = scrubOnboardingRowsByEmail(
                     String.valueOf(details.getOrDefault("primary_email", "")));
 
-            // 3. TODO — scrub the audit index. Requires the AuditIndexer client to
-            //    be wired into this controller's classpath; deferred to a follow-up
-            //    so the failure mode is "explicit TODO" rather than "silent skip".
-            //    The phase3/monitoring ILM policy time-bounds the audit log
-            //    independent of this endpoint, so this is not a strict gap.
+            // 3. Scrub the audit index — sender-side and recipient-side documents in
+            //    the hcx_audit alias. Refresh=true on the underlying delete-by-query
+            //    so subsequent reads see the deletion immediately. The ILM policy in
+            //    phase3/monitoring/elk-stack-config.yml is the long-tail failsafe;
+            //    this is the immediate scrub the PDPL right-of-erasure SLA expects.
+            long auditDocsDeleted = 0L;
+            String auditScrubError = null;
+            try {
+                auditDocsDeleted = auditIndexer.deleteByParticipantCode(participantCode);
+            } catch (Exception e) {
+                // Don't fail the whole erasure if the audit scrub is unreachable;
+                // record the failure on the receipt so a human can chase it. ILM
+                // will eventually take care of the documents.
+                auditScrubError = e.getMessage();
+                logger.error("Audit-index scrub failed for participant_code={}: {}",
+                        participantCode, e.getMessage());
+            }
 
             Map<String, Object> receipt = new HashMap<>();
             receipt.put("participant_code", participantCode);
@@ -102,9 +118,12 @@ public class AdminErasureController extends BaseController {
             receipt.put("registry_status_set", "Inactive");
             receipt.put("onboarding_otp_rows_scrubbed", otpRows);
             receipt.put("onboarding_rows_scrubbed", onboardingRows);
-            receipt.put("audit_index_scrubbed", false);
-            receipt.put("audit_index_note",
-                    "Audit index scrub deferred to ILM policy in phase3/monitoring/elk-stack-config.yml");
+            receipt.put("audit_index_documents_deleted", auditDocsDeleted);
+            if (auditScrubError != null) {
+                receipt.put("audit_index_error", auditScrubError);
+                receipt.put("audit_index_fallback",
+                        "ILM policy in phase3/monitoring/elk-stack-config.yml will eventually age out remaining docs");
+            }
 
             logger.warn("Right-to-erasure complete for participant_code={}: receipt={}",
                     participantCode, receipt);
@@ -120,8 +139,7 @@ public class AdminErasureController extends BaseController {
         String sql = "UPDATE " + onboardingOtpTable
                 + " SET email_otp = '', phone_otp = '', status = 'PURGED', updatedOn = ? "
                 + " WHERE participant_code = ?";
-        postgreSQLClient.execute(sql, System.currentTimeMillis(), participantCode);
-        return -1; // see TODO in PayloadRetentionScheduler about executeUpdate-with-count
+        return postgreSQLClient.executeUpdate(sql, System.currentTimeMillis(), participantCode);
     }
 
     private int scrubOnboardingRowsByEmail(String email) throws Exception {
@@ -129,7 +147,6 @@ public class AdminErasureController extends BaseController {
         String sql = "UPDATE " + onboardingTable
                 + " SET status = 'PURGED', updatedOn = ? "
                 + " WHERE applicant_email = ?";
-        postgreSQLClient.execute(sql, System.currentTimeMillis(), email);
-        return -1;
+        return postgreSQLClient.executeUpdate(sql, System.currentTimeMillis(), email);
     }
 }

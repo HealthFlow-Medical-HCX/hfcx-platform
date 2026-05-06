@@ -65,7 +65,8 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <!-- 1.18.30 is the first JDK-21-compatible release; see hcx-core/hcx-common/pom.xml. -->
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
