@@ -60,8 +60,42 @@ Rationale:
 - Whether the published integration guide should expose a future opt-in mode (Option C) at all. That is a product decision for a later release.
 - Whether the platform should ever do **structural** validation on encrypted payloads (e.g. verifying the JWE compact serialization is well-formed, that the alg header is `RSA-OAEP-256`, etc.) — yes, those header-level checks are fine and don't break zero-knowledge.
 
+## Profile-based enforcement (added in v1.3)
+
+The hcx-apis module is multi-purpose. It serves both as the gateway's API
+surface (where decryption MUST NOT happen) and as a reference recipient
+HCX-API (where it MUST happen). To prevent the gateway from accidentally
+decrypting, the deployment topology is now explicit via Spring profile:
+
+- `gateway` profile (`application-gateway.yml`) — `crypto.jwe.enabled=false`,
+  FHIR/Egyptian validation off. This is the production gateway role.
+- `recipient-hcx-api` profile (`application-recipient-hcx-api.yml`) —
+  `crypto.jwe.enabled=true`, FHIR/Egyptian validation on. This is the role
+  a payer's or provider's own HCX-API instance takes when it terminates
+  encrypted traffic from the gateway.
+
+`DeploymentProfileGuard` (a Spring `ApplicationReadyEvent` listener) refuses
+to start the application if the profile and the feature flags contradict
+each other:
+
+- `deployment.role=gateway` + any of (`crypto.jwe.enabled`,
+  `fhir.validation.enabled`, `egyptian.validation.enabled`) = `true` →
+  `IllegalStateException`. Loud failure prevents Decision 14 violation.
+- `deployment.role=recipient-hcx-api` + any of those flags = `false` →
+  `IllegalStateException`. A recipient that doesn't decrypt is a deployment
+  bug.
+- `deployment.role` unset → `IllegalStateException`. Forces operators to
+  pick a topology explicitly rather than relying on default-on flags.
+
+As an additional defense in depth, `JwePayloadProcessor` is annotated
+`@ConditionalOnProperty(name = "crypto.jwe.enabled", havingValue = "true")`
+so the bean does not even exist on the gateway profile. The
+`@Autowired(required = false)` field in `BaseController` stays null and
+the inbound payload is forwarded opaque.
+
 ## Linked
 
 - PR #7: P0-2 scaffolding (the surfacing of this decision in the PR body).
 - Integration Guide §25–28 (JWE), §29 (FHIR), §34 (SDK distribution).
 - Production-Readiness Remediation Plan §13.e (now superseded).
+- v1.3 Remediation Plan, Gap N1 (introduced the profile-based enforcement).

@@ -89,11 +89,24 @@ hcx:
   urls:
     notallowed: ${not_allowed_urls:http://dev-hcx.healthflow.eg/api,http://staging-hcx.healthflow.eg/api}
 
-# Decision 14 — recipient-side validation pipeline. All three flags default ON
-# in production; flip to false in an emergency to roll back without redeploying.
+# Decision 14 — recipient-side validation pipeline.
+#
+# IMPORTANT (Gap N1 v1.3): the hcx-apis module is multi-purpose. It serves
+# both as the gateway's API surface (where decryption MUST NOT happen) and
+# as a reference recipient HCX-API (where it MUST happen).
+#
+# The defaults below are FALSE because most deployments are gateways. Activate
+# the 'recipient-hcx-api' Spring profile (SPRING_PROFILES_ACTIVE=recipient-hcx-api)
+# to flip every flag to true; that profile is for instances that terminate
+# encrypted traffic from the gateway. Activate the 'gateway' profile explicitly
+# on gateway deployments so DeploymentProfileGuard can refuse to start with a
+# misconfigured environment.
+#
+# Setting CRYPTO_JWE_ENABLED=true in a gateway deployment violates Decision 14
+# and is rejected at startup by DeploymentProfileGuard.
 crypto:
   jwe:
-    enabled: ${CRYPTO_JWE_ENABLED:true}
+    enabled: ${CRYPTO_JWE_ENABLED:false}
   vault:
     addr: ${VAULT_ADDR:}
     token: ${VAULT_TOKEN:}
@@ -105,12 +118,17 @@ crypto:
     expiryEpochMillis: ${CRYPTO_FILE_EXPIRY_EPOCH_MILLIS:9223372036854775807}
 fhir:
   validation:
-    enabled: ${FHIR_VALIDATION_ENABLED:true}
+    enabled: ${FHIR_VALIDATION_ENABLED:false}
   ig:
     packagePath: ${FHIR_IG_PACKAGE_PATH:classpath:fhir/egyptian-ig.tgz}
 egyptian:
   validation:
-    enabled: ${EGYPTIAN_VALIDATION_ENABLED:true}
+    enabled: ${EGYPTIAN_VALIDATION_ENABLED:false}
+
+# Deployment role — see application-gateway.yml and application-recipient-hcx-api.yml.
+# DeploymentProfileGuard refuses to start if this is left UNSET.
+deployment:
+  role: ${DEPLOYMENT_ROLE:UNSET}
 
 #Notifications related configurations
 notification:

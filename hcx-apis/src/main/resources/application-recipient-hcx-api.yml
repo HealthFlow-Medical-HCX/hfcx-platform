@@ -1,0 +1,24 @@
+# Spring profile: recipient-hcx-api
+#
+# This profile is for instances that terminate JWE-encrypted traffic forwarded
+# by the gateway and run the recipient-side processing per Integration Guide
+# §26.4: decrypt the payload, validate against the Egyptian FHIR IG, and run
+# Egyptian field-level validators.
+#
+# In single-tenant deployments (where the gateway and recipient-hcx-api are
+# co-located in one process), use this profile. In multi-tenant production
+# deployments, this profile lives on payer/provider HCX-API instances; the
+# gateway uses application-gateway.yml.
+#
+# Activate with: SPRING_PROFILES_ACTIVE=recipient-hcx-api
+crypto:
+  jwe:
+    enabled: true
+fhir:
+  validation:
+    enabled: true
+egyptian:
+  validation:
+    enabled: true
+deployment:
+  role: recipient-hcx-api

@@ -14,6 +14,12 @@ egyptian:
   validation:
     enabled: ${egyptian_validation_enabled:false}
 
+# Tests run as 'gateway' role so DeploymentProfileGuard accepts the all-flags-off
+# configuration. Individual tests of the guard itself construct it directly
+# rather than through the Spring context.
+deployment:
+  role: ${deployment_role:gateway}
+
 kafka:
   topic:
     payload: ${kafka_payload_topic:local.hcx.request.payload}
