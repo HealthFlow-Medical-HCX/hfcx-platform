@@ -1,0 +1,22 @@
+# Spring profile: gateway
+#
+# This profile is for production gateway deployments. Per Decision 14
+# (zero-knowledge transport), the gateway must NEVER decrypt JWE payloads
+# or run FHIR / Egyptian-field validation against cleartext bodies.
+#
+# This file pins the JWE-related defaults so a gateway deployment cannot
+# accidentally turn decryption on. DeploymentProfileGuard verifies these
+# values at ApplicationReadyEvent and refuses to start otherwise.
+#
+# Activate with: SPRING_PROFILES_ACTIVE=gateway
+crypto:
+  jwe:
+    enabled: false
+fhir:
+  validation:
+    enabled: false
+egyptian:
+  validation:
+    enabled: false
+deployment:
+  role: gateway

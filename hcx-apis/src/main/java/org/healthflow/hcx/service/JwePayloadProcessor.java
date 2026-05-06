@@ -12,6 +12,7 @@ import org.healthflow.hcx.utils.validators.EgyptianFieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,7 +50,16 @@ import java.util.Map;
  *      if the resource isn't shaped right, the field-level error message
  *      would be a confusing follow-on. FHIR errors take priority.
  */
+/*
+ * Defense in depth (Gap N1 v1.3): the bean is only instantiated when
+ * {@code crypto.jwe.enabled=true}. On the gateway profile (where the flag
+ * is pinned to false), the bean does not exist at all — BaseController's
+ * {@code @Autowired(required = false)} field stays null and the inbound
+ * payload is forwarded opaque. DeploymentProfileGuard is the loud check;
+ * this is the silent backstop.
+ */
 @Service
+@ConditionalOnProperty(name = "crypto.jwe.enabled", havingValue = "true")
 public class JwePayloadProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(JwePayloadProcessor.class);

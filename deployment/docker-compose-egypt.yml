@@ -134,7 +134,14 @@ services:
     image: hcx-api:egypt-fixed
     container_name: hcx-api
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      # Gap N1 v1.3 — explicit deployment role.
+      # This is the recipient HCX-API: it terminates JWE-encrypted traffic
+      # forwarded from hcx-api-gateway, decrypts, validates against the
+      # Egyptian FHIR IG, runs Egyptian field validators. The 'dev' profile
+      # is composed in for local conveniences (verbose logging, etc.).
+      # DeploymentProfileGuard refuses to start without one of {gateway,
+      # recipient-hcx-api}.
+      SPRING_PROFILES_ACTIVE: recipient-hcx-api,dev
       # PostgreSQL Configuration
       POSTGRES_HOST: hcx-postgres
       POSTGRES_PORT: 5432
