@@ -1,0 +1,194 @@
+# =============================================================================
+# Integration test compose for the four §31 protocol cycles.
+# =============================================================================
+# Distinct container names + port offsets vs. deployment/docker-compose-egypt.yml
+# so the two can coexist on a developer laptop. We keep this file PARALLEL
+# rather than `extends:`-ing the prod compose because:
+#   1. Prod compose targets pre-built images (`hcx-api:egypt-fixed`, etc.)
+#      that aren't available in CI and would require a separate build job.
+#   2. Prod compose ships Elasticsearch + 4 React portals; pulling them
+#      would blow the 10-minute budget.
+#   3. The test compose intentionally omits Elasticsearch (audit topic is
+#      asserted via Kafka directly) and runs Keycloak in-memory dev mode.
+# =============================================================================
+version: '3.8'
+
+networks:
+  hcx-test-network:
+    driver: bridge
+
+volumes:
+  hcx-test-postgres:
+  hcx-test-kafka:
+
+services:
+  hcx-test-postgres:
+    image: postgres:14-alpine
+    container_name: hcx-test-postgres
+    environment:
+      POSTGRES_DB: registry
+      POSTGRES_USER: ${POSTGRES_USER:-hcxtest}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hcxtest}
+    volumes:
+      - hcx-test-postgres:/var/lib/postgresql/data
+    networks: [hcx-test-network]
+    ports:
+      - "55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hcxtest}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  hcx-test-redis:
+    image: redis:7-alpine
+    container_name: hcx-test-redis
+    command: redis-server --appendonly no --save ""
+    networks: [hcx-test-network]
+    ports:
+      - "56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  hcx-test-kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: hcx-test-kafka
+    environment:
+      # KRaft single-node setup, identical topology to prod compose so
+      # hcx-apis Spring Kafka properties don't need to change.
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://hcx-test-kafka:29092,PLAINTEXT_HOST://localhost:59092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@hcx-test-kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://hcx-test-kafka:29092,CONTROLLER://hcx-test-kafka:29093,PLAINTEXT_HOST://0.0.0.0:59092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      CLUSTER_ID: 'TestClusterIdHcx00012345'
+    volumes:
+      - hcx-test-kafka:/var/lib/kafka/data
+    networks: [hcx-test-network]
+    ports:
+      - "59092:59092"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:29092 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  hcx-test-keycloak:
+    # Dev mode + h2 — fast startup (<30s) and good enough for JWT smoke
+    # tests. The harness disables real auth on the gateway via env vars
+    # for scenario simplicity; this container exists so JWT_JWK_URL
+    # doesn't fail-fast at boot.
+    image: quay.io/keycloak/keycloak:22.0.5
+    container_name: hcx-test-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: 'true'
+    networks: [hcx-test-network]
+    ports:
+      - "58080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\\r\\nhost: 127.0.0.1\\r\\nConnection: close\\r\\n\\r\\n' >&3;grep 'HTTP/1.1 200 OK' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # ---------------------------------------------------------------------------
+  # HCX core services. Image tags match the prod compose so a dev who has
+  # already built `hcx-api:egypt-fixed` / `hcx-api-gateway:egypt-fixed`
+  # locally gets a fast inner loop. CI builds them via `docker build` in
+  # harness/run.sh before `compose up`.
+  # ---------------------------------------------------------------------------
+  hcx-test-api:
+    image: hcx-api:egypt-fixed
+    container_name: hcx-test-api
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      POSTGRES_HOST: hcx-test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: registry
+      POSTGRES_USER: ${POSTGRES_USER:-hcxtest}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hcxtest}
+      REDIS_HOST: hcx-test-redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP_SERVERS: hcx-test-kafka:29092
+      # ES intentionally not provisioned — set a bogus host; audit aspects
+      # that hard-depend on ES are skipped via SPRING_PROFILES_ACTIVE.
+      ES_HOST: hcx-test-redis
+      ES_PORT: 6379
+      KEYCLOAK_URL: http://hcx-test-keycloak:8080
+      KEYCLOAK_REALM: master
+      JWT_JWK_URL: http://hcx-test-keycloak:8080/realms/master/protocol/openid-connect/certs
+      # Skip real registry lookups — see harness/run.sh.
+      REGISTRY_BASE_PATH: http://localhost:0/registry
+    networks: [hcx-test-network]
+    ports:
+      - "58082:8080"
+    depends_on:
+      hcx-test-postgres: { condition: service_healthy }
+      hcx-test-redis: { condition: service_healthy }
+      hcx-test-kafka: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  hcx-test-api-gateway:
+    image: hcx-api-gateway:egypt-fixed
+    container_name: hcx-test-api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      hcx-api.basePath: http://hcx-test-api:8080
+      REDIS_HOST: hcx-test-redis
+      REDIS_PORT: 6379
+      ES_HOST: hcx-test-redis
+      ES_PORT: 6379
+      JWT_JWK_URL: http://hcx-test-keycloak:8080/realms/master/protocol/openid-connect/certs
+    networks: [hcx-test-network]
+    ports:
+      - "58081:8095"
+    depends_on:
+      hcx-test-api: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8095/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # Mock §31 participants. Built from sibling modules under tests/integration/.
+  # Internal-only — the harness curls them from inside a transient container
+  # on hcx-test-network so we don't need to expose them on the host.
+  # ---------------------------------------------------------------------------
+  mock-provider:
+    build:
+      context: ./mock-provider
+    container_name: mock-provider
+    environment:
+      MOCK_PARTICIPANT_CODE: hospital-1.example.com
+    networks: [hcx-test-network]
+    expose:
+      - "8090"
+
+  mock-payer:
+    build:
+      context: ./mock-payer
+    container_name: mock-payer
+    environment:
+      MOCK_PARTICIPANT_CODE: payer-1.example.com
+    networks: [hcx-test-network]
+    expose:
+      - "8091"

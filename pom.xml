@@ -10,7 +10,13 @@
     <packaging>pom</packaging>
 
     <properties>
-        <sonar.organization>swasth-digital-health-foundation</sonar.organization>
+        <!--
+          Verify with the Sonar admin team that the 'healthflow' org slug
+          actually exists and the project key matches the SonarCloud project.
+          Previously: 'swasth-digital-health-foundation' (the upstream project).
+        -->
+        <sonar.organization>healthflow</sonar.organization>
+        <sonar.projectKey>HealthFlow-Medical-HCX_hfcx-platform</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 

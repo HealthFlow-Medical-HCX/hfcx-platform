@@ -1,0 +1,82 @@
+# =============================================================================
+# §31 protocol integration tests (Gap 17).
+# =============================================================================
+# Runs the harness under tests/integration/ on PRs and main pushes that
+# touch the harness, hcx-apis, or api-gateway. Hard 15-minute timeout
+# matches the harness's own <10 min target with margin.
+# =============================================================================
+name: integration-test
+
+on:
+  pull_request:
+    paths:
+      - 'tests/integration/**'
+      - 'hcx-apis/**'
+      - 'api-gateway/**'
+      - '.github/workflows/integration-test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/integration/**'
+      - 'hcx-apis/**'
+      - 'api-gateway/**'
+      - '.github/workflows/integration-test.yml'
+
+concurrency:
+  group: integration-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: §31 cycle harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (build) / 11 (target)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Set up Docker Buildx (BuildKit)
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate compose file
+        run: docker compose -f tests/integration/docker-compose-test.yml config -q
+
+      # Build the prod images so the harness runs in full mode (not degraded).
+      # If either build fails (e.g. due to upstream changes), the harness
+      # falls back to mock-only mode and still reports.
+      - name: Build hcx-apis image
+        run: docker build -t hcx-api:egypt-fixed hcx-apis/ || echo "::warning::hcx-api build failed; harness will run degraded"
+
+      - name: Build api-gateway image
+        run: docker build -t hcx-api-gateway:egypt-fixed api-gateway/ || echo "::warning::api-gateway build failed; harness will run degraded"
+
+      - name: Run harness
+        id: harness
+        env:
+          POSTGRES_USER: hcxtest
+          POSTGRES_PASSWORD: hcxtest
+        run: bash tests/integration/harness/run.sh
+
+      - name: Capture container logs on failure
+        if: failure()
+        run: |
+          mkdir -p /tmp/hcx-it-logs
+          docker compose -p hcx-it -f tests/integration/docker-compose-test.yml ps > /tmp/hcx-it-logs/ps.txt 2>&1 || true
+          for c in $(docker ps -a --format '{{.Names}}' | grep -E '^(hcx-test-|mock-)' || true); do
+            docker logs "$c" > "/tmp/hcx-it-logs/${c}.log" 2>&1 || true
+          done
+
+      - name: Upload logs artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-logs-${{ github.run_id }}
+          path: /tmp/hcx-it-logs/
+          retention-days: 7

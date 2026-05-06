@@ -1,0 +1,49 @@
+{
+  "resourceType": "Bundle",
+  "id": "CoverageEligibilityRequestBundle-fixture-001",
+  "meta": {
+    "lastUpdated": "2026-05-06T08:00:00.000+00:00",
+    "profile": [
+      "https://ig.hcxprotocol.io/v0.7.1/StructureDefinition-CoverageEligibilityRequestBundle.html"
+    ]
+  },
+  "identifier": {
+    "system": "https://www.tmh.in/bundle",
+    "value": "fixture-001"
+  },
+  "type": "document",
+  "timestamp": "2026-05-06T08:00:00.000+00:00",
+  "entry": [
+    {
+      "fullUrl": "Composition/CompositionExample-01",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "CompositionExample-01",
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "https://fhir.loinc.org",
+              "code": "60593-1",
+              "display": "Eligibility Request"
+            }
+          ]
+        },
+        "title": "Coverage Eligibility Request"
+      }
+    },
+    {
+      "fullUrl": "CoverageEligibilityRequest/CoverageEligibilityRequest-fixture-001",
+      "resource": {
+        "resourceType": "CoverageEligibilityRequest",
+        "id": "CoverageEligibilityRequest-fixture-001",
+        "status": "active",
+        "purpose": ["validation"],
+        "patient": {"reference": "Patient/PatientExample-01"},
+        "created": "2026-05-06",
+        "insurer": {"reference": "Organization/OrgExample-01"},
+        "provider": {"reference": "Organization/OrgExample-02"}
+      }
+    }
+  ]
+}

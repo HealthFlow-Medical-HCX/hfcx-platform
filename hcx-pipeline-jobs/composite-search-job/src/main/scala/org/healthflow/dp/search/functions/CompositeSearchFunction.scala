@@ -7,7 +7,7 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.slf4j.LoggerFactory
 import org.swasth.dp.core.function.{BaseDispatcherFunction, ValidationResult}
 import org.swasth.dp.core.job.Metrics
-import org.swasth.dp.core.util.{Constants, JSONUtil, PostgresConnect, PostgresConnectionConfig}
+import org.swasth.dp.core.util.{Constants, JSONUtil, PostgresConnect, PostgresConnectionConfig, TableNames}
 import org.swasth.dp.search.task.SearchConfig
 
 import java.sql.Timestamp
@@ -95,7 +95,11 @@ class CompositeSearchFunction(config: SearchConfig)(implicit val stringTypeInfo:
 
   @throws[Exception]
   def insertSearchRecord(correlationId: String, apiCallId: String, senderCode: String, recipientCode: String, status: String, searchResponse: String): Unit = {
-    val query: String = String.format("INSERT INTO  %s (correlation_id,apicall_id,sender_code,recipient_code,response_status,response_data,apicall_time) " + "VALUES (?,?,?,?,?,?::JSON,?) ON CONFLICT ON CONSTRAINT composite_search_pkey DO NOTHING", config.searchTable)
+    // Allow-list the table name (JDBC cannot parameterize identifiers); all column
+    // values are already bound below via PreparedStatement parameter slots.
+    val query: String = "INSERT INTO " + TableNames.validate(config.searchTable) +
+      " (correlation_id,apicall_id,sender_code,recipient_code,response_status,response_data,apicall_time) " +
+      "VALUES (?,?,?,?,?,?::JSON,?) ON CONFLICT ON CONSTRAINT composite_search_pkey DO NOTHING"
     val preStatement = postgresConnect.getConnection.prepareStatement(query)
     try {
       postgresConnect.connection.setAutoCommit(false)

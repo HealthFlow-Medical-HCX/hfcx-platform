@@ -3,6 +3,9 @@ rbac:
     paths:
       - /health
       - /service/health
+      # Gap 10 v1.2 — /auth/token IS the authentication endpoint; clients call it
+      # without a JWT to obtain one, per Integration Guide §14.3.
+      - /auth/token
   - role: AUTHENTICATED
   - role: provider
     paths:

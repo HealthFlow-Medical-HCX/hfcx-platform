@@ -11,12 +11,13 @@ import org.healthflow.common.dto.Request;
 import org.healthflow.common.helpers.EventGenerator;
 import org.healthflow.common.utils.Constants;
 import org.healthflow.common.utils.JSONUtils;
+import org.healthflow.common.utils.TableNames;
 import org.healthflow.kafka.client.KafkaClient;
 import org.healthflow.postgresql.PostgreSQLClient;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,10 +44,18 @@ public class RetryScheduler extends BaseScheduler {
         System.out.println("Retry batch job is started");
         ResultSet result = null;
         Connection connection = postgreSQLClient.getConnection();
-        Statement createStatement = connection.createStatement();
-        try {
-            String selectQuery = String.format("SELECT * FROM %s WHERE status = '%s' AND retryCount <= %d;", postgresTableName, Constants.RETRY_STATUS, maxRetry);
-            result = postgreSQLClient.executeQuery(selectQuery);
+        // Validate the table name once via the allow-list (JDBC cannot bind
+        // identifiers); all data values flow through PreparedStatement params.
+        String table = TableNames.validate(postgresTableName);
+        String selectQuery = "SELECT * FROM " + table
+                + " WHERE status = ? AND retryCount <= ?";
+        String updateQuery = "UPDATE " + table
+                + " SET status = ?, retryCount = ?, lastUpdatedOn = ? WHERE mid = ?";
+        PreparedStatement updatePs = connection.prepareStatement(updateQuery);
+        try (PreparedStatement selectPs = connection.prepareStatement(selectQuery)) {
+            selectPs.setString(1, Constants.RETRY_STATUS);
+            selectPs.setInt(2, maxRetry);
+            result = selectPs.executeQuery();
             int metrics = 0;
             while (result.next()) {
                 String action = result.getString(Constants.ACTION);
@@ -59,11 +68,14 @@ public class RetryScheduler extends BaseScheduler {
                 eventMap.put(Constants.RETRY_INDEX, retryCount);
                 kafkaClient.send(kafkaOutputTopic, request.getHcxSenderCode(), JSONUtils.serialize(eventMap));
                 System.out.println("Event is pushed to kafka topic :: mid: " + request.getMid() + " :: retry count: " + retryCount);
-                String updateQuery = String.format("UPDATE %s SET status = '%s', retryCount = %d, lastUpdatedOn = %d WHERE mid = '%s'", postgresTableName, Constants.RETRY_PROCESSING_STATUS, retryCount, System.currentTimeMillis(), request.getMid());
-                createStatement.addBatch(updateQuery);
+                updatePs.setString(1, Constants.RETRY_PROCESSING_STATUS);
+                updatePs.setInt(2, retryCount);
+                updatePs.setLong(3, System.currentTimeMillis());
+                updatePs.setString(4, request.getMid());
+                updatePs.addBatch();
                 metrics++;
             }
-            createStatement.executeBatch();
+            updatePs.executeBatch();
             System.out.println("Total number of events processed: " + metrics);
             System.out.println("Job is completed");
         } catch (Exception e) {
@@ -71,7 +83,7 @@ public class RetryScheduler extends BaseScheduler {
             throw e;
         } finally {
             if(result != null) result.close();
-            if(createStatement != null) createStatement.close();
+            updatePs.close();
             connection.close();
         }
     }

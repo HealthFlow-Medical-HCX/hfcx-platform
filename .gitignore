@@ -11,3 +11,7 @@
 # gitignore for Gradle project(s).
 **/.gradle/**
 **/lib/build/**
+
+# Maven shade plugin generates dependency-reduced-pom.xml as build output;
+# never commit (Gap 22 v1.2 remediation).
+**/dependency-reduced-pom.xml

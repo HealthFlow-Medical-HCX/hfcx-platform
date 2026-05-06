@@ -1,0 +1,23 @@
+id: hl7.fhir.healthflow.egypt
+canonical: https://healthflow.gov.eg/fhir/ig
+name: HealthFlowEgyptianIG
+title: HealthFlow Egyptian FHIR Implementation Guide
+description: HealthFlow Egyptian Implementation Guide for HCX claims exchange
+status: draft
+version: 0.1.0
+fhirVersion: 4.0.1
+copyrightYear: 2026+
+releaseLabel: ci-build
+
+publisher:
+  name: HealthFlow Medical
+  url: https://healthflow.gov.eg
+  email: support@healthflow.eg
+
+parameters:
+  excludettl: true
+  excludexml: true
+  excludemap: true
+
+dependencies:
+  hl7.fhir.r4.core: 4.0.1

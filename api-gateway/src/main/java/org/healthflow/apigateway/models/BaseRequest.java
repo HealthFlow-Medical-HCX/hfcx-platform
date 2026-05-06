@@ -53,9 +53,48 @@ public class BaseRequest {
             } else {
                 this.protocolHeaders = payload;
             }
+            normalizeHeaderAliases(this.protocolHeaders);
             this.payloadWithoutSensitiveData = PayloadUtils.removeSensitiveData(payload, apiAction);
         } catch (JsonParseException e) {
             throw new ClientException(ErrorCodes.ERR_INVALID_PAYLOAD, PAYLOAD_PARSE_ERR);
+        }
+    }
+
+    /**
+     * Header naming compatibility (Gap 7 of v1.2 remediation plan).
+     *
+     * <p>The Integration Guide §28 documents the canonical hyphen form
+     * (e.g. {@code x-hcx-sender-code}); the legacy implementation used
+     * underscores (e.g. {@code x-hcx-sender_code}). To accept both without
+     * forcing a coordinated client cutover, this method aliases each
+     * underscore-form key to its hyphen-form equivalent (and vice versa)
+     * for the seven HCX-prefixed business headers.
+     *
+     * <p>Both forms become readable from the same map; downstream code that
+     * reads either form continues to work. A deprecation warning is logged
+     * when an underscore-form header is observed so operators can track
+     * client migrations.
+     */
+    private static void normalizeHeaderAliases(Map<String, Object> headers) {
+        if (headers == null || headers.isEmpty()) return;
+        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseRequest.class);
+        String[] suffixes = {
+                "sender_code", "recipient_code", "api_call_id", "correlation_id",
+                "redirect_to", "error_details", "debug_details"
+        };
+        for (String s : suffixes) {
+            String underscore = "x-hcx-" + s;
+            String hyphen = "x-hcx-" + s.replace('_', '-');
+            if (headers.containsKey(underscore) && !headers.containsKey(hyphen)) {
+                headers.put(hyphen, headers.get(underscore));
+                log.warn("Deprecated header form '{}' received; integrator should migrate to '{}' "
+                        + "(Integration Guide §28).", underscore, hyphen);
+            } else if (headers.containsKey(hyphen) && !headers.containsKey(underscore)) {
+                // The validator's mandatory-list config still references the
+                // underscore form for backward compatibility; keep both entries
+                // in the map until the config flips fully to hyphen form.
+                headers.put(underscore, headers.get(hyphen));
+            }
         }
     }
 

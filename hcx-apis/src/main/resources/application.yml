@@ -84,9 +84,33 @@ redirect:
 
 #hcx config
 hcx:
-  instanceName: ${hcx_instance_name:swasth-hcx}
+  # Default instance name per Gap 20 v1.2 — was 'swasth-hcx' (the upstream name).
+  instanceName: ${hcx_instance_name:healthflow-hcx-egypt}
   urls:
     notallowed: ${not_allowed_urls:http://dev-hcx.healthflow.eg/api,http://staging-hcx.healthflow.eg/api}
+
+# Decision 14 — recipient-side validation pipeline. All three flags default ON
+# in production; flip to false in an emergency to roll back without redeploying.
+crypto:
+  jwe:
+    enabled: ${CRYPTO_JWE_ENABLED:true}
+  vault:
+    addr: ${VAULT_ADDR:}
+    token: ${VAULT_TOKEN:}
+    localKeyPath: ${CRYPTO_VAULT_LOCAL_KEY_PATH:secret/data/hfcx/local/private}
+    cache:
+      ttl: ${CRYPTO_VAULT_CACHE_TTL:PT1H}
+  file:
+    privateKeyPath: ${CRYPTO_FILE_PRIVATE_KEY_PATH:./keys/local-private.pem}
+    expiryEpochMillis: ${CRYPTO_FILE_EXPIRY_EPOCH_MILLIS:9223372036854775807}
+fhir:
+  validation:
+    enabled: ${FHIR_VALIDATION_ENABLED:true}
+  ig:
+    packagePath: ${FHIR_IG_PACKAGE_PATH:classpath:fhir/egyptian-ig.tgz}
+egyptian:
+  validation:
+    enabled: ${EGYPTIAN_VALIDATION_ENABLED:true}
 
 #Notifications related configurations
 notification:

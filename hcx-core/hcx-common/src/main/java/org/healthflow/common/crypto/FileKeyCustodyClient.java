@@ -1,5 +1,7 @@
 package org.healthflow.common.crypto;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +16,9 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * File-backed {@link KeyCustodyClient} for development and tests only.
@@ -40,7 +42,10 @@ public class FileKeyCustodyClient implements KeyCustodyClient {
 
     private final RSAPrivateKey localPrivateKey;
     private final Instant localKeyExpiry;
-    private final ConcurrentHashMap<String, RSAPublicKey> publicKeyCache = new ConcurrentHashMap<>();
+    private final Cache<String, RSAPublicKey> publicKeyCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofHours(1))
+            .maximumSize(10_000)
+            .build();
 
     /**
      * @param activeProfile     Spring profile (e.g. {@code dev}, {@code staging});
@@ -56,17 +61,35 @@ public class FileKeyCustodyClient implements KeyCustodyClient {
                     "FileKeyCustodyClient must not be used in production. "
                     + "Configure VaultKeyCustodyClient or an HSM-backed implementation.");
         }
+        if (privateKeyPemPath == null || !Files.exists(privateKeyPemPath)) {
+            // Test/dev convenience: no PEM on disk → generate an ephemeral 2048-bit
+            // RSA key pair so the bean wires cleanly even when crypto.jwe.enabled=false
+            // and no caller will actually invoke decryption. Logged at WARN so it's
+            // visible in any environment where it shouldn't apply.
+            this.localPrivateKey = generateEphemeralPrivateKey();
+            this.localKeyExpiry = Instant.ofEpochMilli(expiryEpochMillis);
+            logger.warn("FileKeyCustodyClient (profile={}) using EPHEMERAL key — no PEM at {}. "
+                    + "Acceptable for tests and local dev; never for production.",
+                    activeProfile, privateKeyPemPath);
+            return;
+        }
         this.localPrivateKey = loadPrivateKey(privateKeyPemPath);
         this.localKeyExpiry = Instant.ofEpochMilli(expiryEpochMillis);
         logger.info("FileKeyCustodyClient initialized (profile={}). Local cert expiry: {}",
                 activeProfile, this.localKeyExpiry);
     }
 
+    private static RSAPrivateKey generateEphemeralPrivateKey() throws Exception {
+        java.security.KeyPairGenerator gen = java.security.KeyPairGenerator.getInstance("RSA");
+        gen.initialize(2048);
+        return (RSAPrivateKey) gen.generateKeyPair().getPrivate();
+    }
+
     @Override
     public RSAPublicKey getRecipientPublicKey(String participantCode) throws Exception {
         // The registry caches participant details elsewhere; this cache is for the
         // parsed RSAPublicKey to avoid X.509 parsing on every dispatch.
-        RSAPublicKey cached = publicKeyCache.get(participantCode);
+        RSAPublicKey cached = publicKeyCache.getIfPresent(participantCode);
         if (cached != null) return cached;
         throw new IllegalStateException(
                 "FileKeyCustodyClient does not auto-fetch from the registry. "
@@ -79,6 +102,13 @@ public class FileKeyCustodyClient implements KeyCustodyClient {
     public void putRecipientPublicKey(String participantCode, URL certUrl) throws Exception {
         String pem = new String(certUrl.openStream().readAllBytes(), StandardCharsets.UTF_8);
         publicKeyCache.put(participantCode, parsePublicKeyFromPem(pem));
+    }
+
+    /**
+     * Test helper for direct cache seeding from an already-parsed key.
+     */
+    public void putRecipientPublicKey(String participantCode, RSAPublicKey publicKey) {
+        publicKeyCache.put(participantCode, publicKey);
     }
 
     @Override

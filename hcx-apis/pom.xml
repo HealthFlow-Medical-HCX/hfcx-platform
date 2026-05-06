@@ -22,6 +22,18 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		<!--
+		  Pin Lombok 1.18.30 explicitly (hcx-common's compile-scope Lombok
+		  bumps the version in its own module but Spring Boot 2.5.5's BOM
+		  pulls 1.18.20 here, which has the JCTree$JCImport NoSuchFieldError
+		  on JDK 21). 1.18.30 is the first release that supports JDK 21.
+		-->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
@@ -110,6 +122,17 @@
 
 	<build>
 		<plugins>
+			<!--
+			  maven-compiler-plugin 3.8.1 (inherited from spring-boot-starter-parent
+			  2.5.5) trips a JCTree$JCImport NoSuchFieldError on JDK 21 with the
+			  newer Lombok pulled in by hcx-common. Pinning 3.13.0 — the same
+			  version hcx-common uses — fixes it.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

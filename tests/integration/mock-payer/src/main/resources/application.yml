@@ -1,0 +1,19 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: mock-payer
+
+mock:
+  participant-code: ${MOCK_PARTICIPANT_CODE:payer-1.example.com}
+  rsa-key-path: ${MOCK_RSA_KEY_PATH:/keys/payer-private.pem}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

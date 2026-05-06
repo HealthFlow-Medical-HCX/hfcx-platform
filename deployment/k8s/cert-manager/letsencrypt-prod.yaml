@@ -1,0 +1,67 @@
+# Sample cert-manager ClusterIssuer for HealthFlow Egypt.
+#
+# This issues TLS certificates from Let's Encrypt's production CA using the
+# ACME HTTP-01 challenge. Prerequisites:
+#
+#   1. cert-manager installed in the cluster (https://cert-manager.io/docs/installation/).
+#   2. The DNS A records listed in deployment/DEPLOYMENT_GUIDE.md are
+#      published and resolve to the cluster ingress.
+#   3. An Ingress controller (nginx-ingress, Traefik, etc.) is reachable on
+#      port 80 from the public internet so the HTTP-01 solver can answer
+#      the ACME challenge.
+#
+# Apply with:
+#   kubectl apply -f deployment/k8s/cert-manager/letsencrypt-prod.yaml
+#
+# Then reference the issuer from any Ingress / Certificate resource via:
+#   cert-manager.io/cluster-issuer: letsencrypt-prod
+#
+# For private clusters that cannot expose port 80, replace the http01
+# solver below with a dns01 solver matching your DNS provider — see
+# https://cert-manager.io/docs/configuration/acme/dns01/.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Replace with the operations contact for the HealthFlow deployment.
+    # Let's Encrypt uses this address for expiry notifications and policy
+    # change announcements.
+    email: ops@healthflow.gov.eg
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - http01:
+          ingress:
+            # Match this to the ingress class in use. `nginx` is the
+            # default for the ingress-nginx controller; change to
+            # `traefik`, `haproxy`, etc. as needed.
+            class: nginx
+        selector:
+          dnsZones:
+            - healthflow.gov.eg
+---
+# Example Certificate resource. Uncomment and apply once the issuer above
+# is Ready. cert-manager will provision a single certificate covering all
+# six hostnames and store it in the `healthflow-tls` Secret in the
+# `ingress-nginx` namespace (adjust namespace to where your Ingress lives).
+#
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: healthflow-tls
+#   namespace: ingress-nginx
+# spec:
+#   secretName: healthflow-tls
+#   issuerRef:
+#     name: letsencrypt-prod
+#     kind: ClusterIssuer
+#   dnsNames:
+#     - healthflow.gov.eg
+#     - sandbox.healthflow.gov.eg
+#     - beneficiary.healthflow.gov.eg
+#     - opd.healthflow.gov.eg
+#     - bsp.healthflow.gov.eg
+#     - payer.healthflow.gov.eg

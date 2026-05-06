@@ -8,7 +8,9 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.healthflow.dp.core.util.Constants;
+import org.swasth.dp.core.util.TableNames;
 import org.healthflow.dp.notification.task.NotificationConfig;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -64,13 +66,29 @@ public class NotificationFilterFunction extends BaseNotificationFunction {
 
     private List<String> getParticipantCodes(String topicCode, String senderCode, String id, List<String> recipients) throws SQLException {
         List<String> participantCodes = new ArrayList<>();
-        String formatRecipients = recipients.stream().map(plain ->  "'" + plain + "'").collect(Collectors.joining(","));
-        String query = String.format("SELECT %s,%s FROM %s WHERE %s = '%s' AND %s = '%s' AND %s = 'Active' AND %s IN (%s)", Constants.RECIPIENT_CODE(), Constants.EXPIRY(),
-                config.subscriptionTableName, Constants.SENDER_CODE(), senderCode, Constants.TOPIC_CODE(), topicCode, Constants.SUBSCRIPTION_STATUS(), id, formatRecipients);
-        ResultSet resultSet = postgresConnect.executeQuery(query);
-        while (resultSet.next()) {
-            if (!isExpired(resultSet.getLong(Constants.EXPIRY())))
-                participantCodes.add(resultSet.getString(Constants.RECIPIENT_CODE()));
+        // Bind every data value via PreparedStatement; only the table name is
+        // string-substituted (which is unavoidable in JDBC) and is run through
+        // the allow-list validator first. The IN-list builds N "?" placeholders
+        // sized to the recipient list and binds each value positionally.
+        String inPlaceholders = recipients.stream().map(r -> "?").collect(Collectors.joining(","));
+        String query = "SELECT " + Constants.RECIPIENT_CODE() + "," + Constants.EXPIRY()
+                + " FROM " + TableNames.validate(config.subscriptionTableName)
+                + " WHERE " + Constants.SENDER_CODE() + " = ?"
+                + " AND " + Constants.TOPIC_CODE() + " = ?"
+                + " AND " + Constants.SUBSCRIPTION_STATUS() + " = 'Active'"
+                + " AND " + id + " IN (" + inPlaceholders + ")";
+        try (PreparedStatement ps = postgresConnect.getConnection().prepareStatement(query)) {
+            ps.setString(1, senderCode);
+            ps.setString(2, topicCode);
+            for (int i = 0; i < recipients.size(); i++) {
+                ps.setString(3 + i, recipients.get(i));
+            }
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    if (!isExpired(resultSet.getLong(Constants.EXPIRY())))
+                        participantCodes.add(resultSet.getString(Constants.RECIPIENT_CODE()));
+                }
+            }
         }
         return  participantCodes;
     }

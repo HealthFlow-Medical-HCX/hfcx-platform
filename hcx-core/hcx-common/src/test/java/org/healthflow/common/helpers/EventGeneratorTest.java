@@ -84,11 +84,11 @@ public class EventGeneratorTest {
         Map<String,Object> senderDetails = new HashMap<>();
         senderDetails.put(ROLES,List.of("payor"));
         senderDetails.put(PARTICIPANT_NAME,"new-payor-3");
-        senderDetails.put(PRIMARY_EMAIL,"newpayor003@gmail.com");
+        senderDetails.put(PRIMARY_EMAIL,"payor03@healthflow-hcx-test.gov.eg");
         Map<String,Object> recipentDetails = new HashMap<>();
         recipentDetails.put(ROLES,List.of("payor"));
         recipentDetails.put(PARTICIPANT_NAME,"New payor 2");
-        recipentDetails.put(PRIMARY_EMAIL,"newpayor002@gmail.com");
+        recipentDetails.put(PRIMARY_EMAIL,"payor02@healthflow-hcx-test.gov.eg");
         obj.put(SENDERDETAILS,senderDetails);
         obj.put(RECIPIENTDETAILS,recipentDetails);
         Request request = new Request(obj, ACTION);
@@ -168,7 +168,7 @@ public class EventGeneratorTest {
 
     private Request getNotificationRequest() throws Exception {
         Map<String,Object> obj = new HashMap<>();
-        obj.put(HCX_SENDER_CODE,"hcx-apollo-12345");
+        obj.put(HCX_SENDER_CODE,"provider01.alex_med@healthflow-hcx-test.gov.eg");
         obj.put(HCX_RECIPIENT_CODE,"hcx-gateway");
         obj.put(CORRELATION_ID, "5e934f90-111d-4f0b-b016-c22d820674e4");
         obj.put(API_CALL_ID, "1e83-460a-4f0b-b016-c22d820674e1");
@@ -176,7 +176,7 @@ public class EventGeneratorTest {
         Map<String,Object> notificationHeaders = new HashMap<>();
         notificationHeaders.put(RECIPIENT_ROLES, List.of("payor"));
         notificationHeaders.put(RECIPIENT_CODES, List.of("test-user@hcx"));
-        notificationHeaders.put(SUBSCRIPTIONS, List.of("hcx-notification-001:hcx-apollo-12345"));
+        notificationHeaders.put(SUBSCRIPTIONS, List.of("hcx-notification-001:provider01.alex_med@healthflow-hcx-test.gov.eg"));
         obj.put(NOTIFICATION_HEADERS, notificationHeaders);
         obj.put(PAYLOAD, "eyJhbGciOiJSUzI1NiJ9.eyJ0b3BpY19jb2RlIjoibm90aWYtcGFydGljaXBhbnQtb25ib2FyZGVkIiwibWVzc2FnZSI6IlBhcnRpY2lwYW50IGhhcyBzdWNjZXNzZnVsbHkgb25ib2FyZGVkIn0=.L14NMRVoQq7TMEUt0IiG36P0NgDH1Poz4Nbh5BRZ7BcFXQzUI4SBduIJKY-WFCMPdKBl_LjlSm9JpNULn-gwLiDQ8ipQ3fZhzOkdzyjg0kUfpYN_aLQVgMaZ8Nrw3WytXIHserNxmka3wJQuSLvPnz9aJoFABij2evurnTsKq3oNbR0Oac3FJrpPO2O8fKaXs0Pi5Stf81eqcJ3Xs7oncJqBzgbp_jWShX8Ljfrf_TvM1patR-_h4E0O0HoVb0zD7SQmlKYOy0hw1bli5vdCnkh0tc1dF9yYrTEgofOjRemycFz_wEJ6FjFO1RryaBETw7qQ8hdGLemD545yUxCUng");
         return new Request(obj, NOTIFICATION_NOTIFY);
@@ -198,7 +198,7 @@ public class EventGeneratorTest {
         requestBody.put(SENDER_LIST, new ArrayList<>(){{add("hcx-participant-67890");add("Payor1"); add("Payor2");}});
         requestBody.put(RECIPIENT_CODE, "hcx-participant-12345");
         Request request = new Request(requestBody, NOTIFICATION_SUBSCRIBE);
-        String result = eventGenerator.generateSubscriptionEvent(request ,new HashMap<>(){{put("icici-67890","subscription_1");put("Payor1","subscription_2");put("Payor2","subscription_3");}});
+        String result = eventGenerator.generateSubscriptionEvent(request ,new HashMap<>(){{put("payor01.cairo_insurance@healthflow-hcx-test.gov.eg","subscription_1");put("Payor1","subscription_2");put("Payor2","subscription_3");}});
         assertNotNull(result);
         assertTrue(result.contains(QUEUED_STATUS));
         assertTrue(result.contains(NOTIFICATION_SUBSCRIBE));
@@ -210,19 +210,19 @@ public class EventGeneratorTest {
     @Test
     public void testGenerateSubscriptionAuditEvent() throws Exception {
         Request subscriptionReq = getSubscriptionRequest();
-        Map<String,Object> resultMap = eventGenerator.generateSubscriptionAuditEvent(subscriptionReq,QUEUED_STATUS,new ArrayList<>(){{add("icici-67890");}});
+        Map<String,Object> resultMap = eventGenerator.generateSubscriptionAuditEvent(subscriptionReq,QUEUED_STATUS,new ArrayList<>(){{add("payor01.cairo_insurance@healthflow-hcx-test.gov.eg");}});
         assertNotNull(resultMap);
         assertEquals(AUDIT,resultMap.get(EID));
         assertNotNull(resultMap.get(MID));
         assertEquals(NOTIFICATION_SUBSCRIBE,resultMap.get(ACTION));
         assertEquals("hcx-notification-001",resultMap.get(TOPIC_CODE));
-        assertEquals("hcx-apollo-12345",resultMap.get(HCX_RECIPIENT_CODE));
+        assertEquals("provider01.alex_med@healthflow-hcx-test.gov.eg",resultMap.get(HCX_RECIPIENT_CODE));
         assertNotNull(resultMap.get(Constants.SENDER_LIST));
     }
 
     private Request getSubscriptionRequest() throws Exception {
         Map<String,Object> obj = new HashMap<>();
-        obj.put(RECIPIENT_CODE,"hcx-apollo-12345");
+        obj.put(RECIPIENT_CODE,"provider01.alex_med@healthflow-hcx-test.gov.eg");
         obj.put(TOPIC_CODE,"hcx-notification-001");
         obj.put(SENDER_LIST,new ArrayList<>(){
             { add("Payor1"); add("Payor2");}
@@ -232,13 +232,13 @@ public class EventGeneratorTest {
 
     @Test
     public void testGenerateOnSubscriptionEvent() throws Exception {
-        String result = eventGenerator.generateOnSubscriptionEvent(NOTIFICATION_ON_SUBSCRIBE,"hcx-apollo-12345","icici-67890","hcx-apollo:icici-67890","Active");
+        String result = eventGenerator.generateOnSubscriptionEvent(NOTIFICATION_ON_SUBSCRIBE,"provider01.alex_med@healthflow-hcx-test.gov.eg","payor01.cairo_insurance@healthflow-hcx-test.gov.eg","provider01.alex_med:payor01.cairo_insurance@healthflow-hcx-test.gov.eg","Active");
         assertNotNull(result);
         assertTrue(result.contains(QUEUED_STATUS));
         assertTrue(result.contains(NOTIFICATION_ON_SUBSCRIBE));
-        assertTrue(result.contains("hcx-apollo-12345"));
-        assertTrue(result.contains("icici-67890"));
-        assertTrue(result.contains("hcx-apollo:icici-67890"));
+        assertTrue(result.contains("provider01.alex_med@healthflow-hcx-test.gov.eg"));
+        assertTrue(result.contains("payor01.cairo_insurance@healthflow-hcx-test.gov.eg"));
+        assertTrue(result.contains("provider01.alex_med:payor01.cairo_insurance@healthflow-hcx-test.gov.eg"));
     }
 
     @Test
@@ -305,8 +305,8 @@ public class EventGeneratorTest {
         Map<String, Object> output = eventGenerator.generateAuditEvent(getRequest());
         assertEquals("new-payor-3",getRequest().getSenderName());
         assertEquals("New payor 2",getRequest().getRecipientName());
-        assertEquals("newpayor003@gmail.com",getRequest().getSenderPrimaryEmail());
-        assertEquals("newpayor002@gmail.com" ,getRequest().getRecipientPrimaryEmail());
+        assertEquals("payor03@healthflow-hcx-test.gov.eg",getRequest().getSenderPrimaryEmail());
+        assertEquals("payor02@healthflow-hcx-test.gov.eg" ,getRequest().getRecipientPrimaryEmail());
         assertEquals(List.of("payor"),getRequest().getSenderRole());
         assertEquals(List.of("payor"),getRequest().getSenderRole());
     }

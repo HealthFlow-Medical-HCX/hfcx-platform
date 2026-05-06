@@ -166,8 +166,8 @@ class NotificationControllerTest extends BaseSpec {
         assertEquals("subscription_id-001", resObj.getSubscriptions().get(0).getSubscription_id());
         assertEquals("topic_code-12345", resObj.getSubscriptions().get(0).getTopic_code());
         assertEquals(ACTIVE, resObj.getSubscriptions().get(0).getSubscription_status());
-        assertEquals("hcx-apollo-12345", resObj.getSubscriptions().get(0).getSender_code());
-        assertEquals("ICICI Lombard", resObj.getSubscriptions().get(0).getRecipient_code());
+        assertEquals("provider01.alex_med@healthflow-hcx-test.gov.eg", resObj.getSubscriptions().get(0).getSender_code());
+        assertEquals("Cairo Insurance", resObj.getSubscriptions().get(0).getRecipient_code());
         assertEquals(1629057611000l, resObj.getSubscriptions().get(0).getExpiry());
         assertEquals(false, resObj.getSubscriptions().get(0).isIs_delegated());
     }
@@ -187,8 +187,8 @@ class NotificationControllerTest extends BaseSpec {
         assertEquals("subscription_id-001", resObj.getSubscriptions().get(0).getSubscription_id());
         assertEquals("topic_code-12345", resObj.getSubscriptions().get(0).getTopic_code());
         assertEquals(INACTIVE, resObj.getSubscriptions().get(0).getSubscription_status());
-        assertEquals("hcx-apollo-12345", resObj.getSubscriptions().get(0).getSender_code());
-        assertEquals("ICICI Lombard", resObj.getSubscriptions().get(0).getRecipient_code());
+        assertEquals("provider01.alex_med@healthflow-hcx-test.gov.eg", resObj.getSubscriptions().get(0).getSender_code());
+        assertEquals("Cairo Insurance", resObj.getSubscriptions().get(0).getRecipient_code());
         assertEquals(1629057611000l, resObj.getSubscriptions().get(0).getExpiry());
         assertEquals(false, resObj.getSubscriptions().get(0).isIs_delegated());
     }
@@ -291,7 +291,7 @@ class NotificationControllerTest extends BaseSpec {
         return MockResultSet.create(
                 new String[]{"subscription_id", "subscription_request_id", "subscription_status", "topic_code", "sender_code", "recipient_code", "expiry", "is_delegated"}, //columns
                 new Object[][]{ // data
-                        {"subscription_id-001", "subscription_request_1", status, "topic_code-12345", "hcx-apollo-12345", "ICICI Lombard", 1629057611000l, false}
+                        {"subscription_id-001", "subscription_request_1", status, "topic_code-12345", "provider01.alex_med@healthflow-hcx-test.gov.eg", "Cairo Insurance", 1629057611000l, false}
                 });
     }
 
@@ -299,9 +299,9 @@ class NotificationControllerTest extends BaseSpec {
         return MockResultSet.create(
                 new String[]{"subscription_id", "subscription_request_id","subscription_status", "topic_code", "sender_code", "recipient_code", "expiry", "is_delegated"}, //columns
                 new Object[][]{ // data
-                        {"subscription_id-001", "subscription_request_1", "Active", "topic_code-12345", "hcx-apollo-12345", "ICICI Lombard", 1629057611000l, false},
-                        {"subscription_id-002", "subscription_request_2", "Inactive", "topic_code-12346", "hcx-apollo-12346", "ICICI Lombard", 1629057611000l, false},
-                        {"subscription_id-003", "subscription_request_3", "Pending", "topic_code-12347", "hcx-apollo-12347", "ICICI Lombard", 1629057611000l, true}
+                        {"subscription_id-001", "subscription_request_1", "Active", "topic_code-12345", "provider01.alex_med@healthflow-hcx-test.gov.eg", "Cairo Insurance", 1629057611000l, false},
+                        {"subscription_id-002", "subscription_request_2", "Inactive", "topic_code-12346", "provider02.alex_med@healthflow-hcx-test.gov.eg", "Cairo Insurance", 1629057611000l, false},
+                        {"subscription_id-003", "subscription_request_3", "Pending", "topic_code-12347", "provider03.alex_med@healthflow-hcx-test.gov.eg", "Cairo Insurance", 1629057611000l, true}
                 });
     }
 
@@ -364,7 +364,7 @@ class NotificationControllerTest extends BaseSpec {
 
     private String getNotificationRequest(List<String> subscriptions) throws JsonProcessingException {
         Map<String,Object> notificationHeaders = new HashMap<>();
-        notificationHeaders.put(SENDER_CODE, "hcx-apollo-12345");
+        notificationHeaders.put(SENDER_CODE, "provider01.alex_med@healthflow-hcx-test.gov.eg");
         notificationHeaders.put(TIMESTAMP, System.currentTimeMillis());
         notificationHeaders.put(RECIPIENT_TYPE, SUBSCRIPTION);
         notificationHeaders.put(RECIPIENTS, subscriptions);
@@ -409,7 +409,7 @@ class NotificationControllerTest extends BaseSpec {
     private String getSubscriptionRequest() throws JsonProcessingException {
         Map<String, Object> obj = new HashMap<>();
         obj.put(TOPIC_CODE, "be0e578d-b391-42f9-96f7-1e6bacd91c20");
-        obj.put(RECIPIENT_CODE, "hcx-apollo-12345");
+        obj.put(RECIPIENT_CODE, "provider01.alex_med@healthflow-hcx-test.gov.eg");
         List<String> sendersList = new ArrayList<>() {{
             add("payor1");
             add("payor2"); //1-d2d56996-1b77-4abb-b9e9-0e6e7343c72e
@@ -421,7 +421,7 @@ class NotificationControllerTest extends BaseSpec {
     private String getSubscriptionHcxRequest() throws JsonProcessingException {
         Map<String, Object> obj = new HashMap<>();
         obj.put(TOPIC_CODE, "be0e578d-b391-42f9-96f7-1e6bacd91c20");
-        obj.put(RECIPIENT_CODE, "hcx-apollo-12345");
+        obj.put(RECIPIENT_CODE, "provider01.alex_med@healthflow-hcx-test.gov.eg");
         List<String> sendersList = new ArrayList<>() {{
             add("hcx-registry-code");
         }};
@@ -432,7 +432,7 @@ class NotificationControllerTest extends BaseSpec {
     private String getOnePayorSubscriptionRequest() throws JsonProcessingException {
         Map<String, Object> obj = new HashMap<>();
         obj.put(TOPIC_CODE, "NOTIFICATION@HCX01");
-        obj.put(RECIPIENT_CODE, "hcx-apollo-12345");
+        obj.put(RECIPIENT_CODE, "provider01.alex_med@healthflow-hcx-test.gov.eg");
         List<String> sendersList = new ArrayList<>() {{
             add("payor1");
         }};
@@ -543,7 +543,7 @@ class NotificationControllerTest extends BaseSpec {
     }
 
     private Map<String,Object> getSubscriptionUpdateAuditLog() throws Exception {
-        return JSONUtils.deserialize("{\"eid\":\"AUDIT\",\"edata\":{\"prevStatus\":1,\"status\":0,\"props\":[\"subscription_status\",\"expiry\",\"is_delegated\"]},\"ets\":1659434908868,\"mid\":\"5ee2b9e1-ded6-4b56-afa8-3380107632e0\",\"object\":{\"id\":\"097e0185-eeb1-48f1-b2b0-b68774d02c6d\",\"type\":\"notification\"},\"cdata\":{\"action\":\"/notification/subscription/update\",\"recipient_code\":\"testpayor1.icici@swasth-hcx-dev\",\"sender_code\":\"testprovider1.apollo@swasth-hcx-dev\"}}", Map.class);
+        return JSONUtils.deserialize("{\"eid\":\"AUDIT\",\"edata\":{\"prevStatus\":1,\"status\":0,\"props\":[\"subscription_status\",\"expiry\",\"is_delegated\"]},\"ets\":1659434908868,\"mid\":\"5ee2b9e1-ded6-4b56-afa8-3380107632e0\",\"object\":{\"id\":\"097e0185-eeb1-48f1-b2b0-b68774d02c6d\",\"type\":\"notification\"},\"cdata\":{\"action\":\"/notification/subscription/update\",\"recipient_code\":\"payor01.cairo_insurance@healthflow-hcx-test.gov.eg\",\"sender_code\":\"provider01.alex_med@healthflow-hcx-test.gov.eg\"}}", Map.class);
     }
 
     @Test

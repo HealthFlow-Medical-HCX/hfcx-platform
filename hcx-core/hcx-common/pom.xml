@@ -135,6 +135,22 @@
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
+        <!--
+          Caffeine cache for KeyCustodyClient implementations. 2.9.x is the last
+          line that is JDK 8+11 compatible; the 3.x line requires Java 11 minimum
+          and is fine for this codebase.
+        -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>2.35.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
