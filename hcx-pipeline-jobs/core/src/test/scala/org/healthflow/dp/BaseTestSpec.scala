@@ -1,4 +1,4 @@
-package org.swasth.dp
+package org.healthflow.dp
 
 import org.apache.flink.configuration.Configuration
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}

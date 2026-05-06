@@ -1,4 +1,4 @@
-package org.swasth.dp.search.spec
+package org.healthflow.dp.search.spec
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
@@ -7,10 +7,10 @@ import org.apache.flink.api.scala.createTypeInformation
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses
 import org.scalatest.{FlatSpec, Matchers}
-import org.swasth.dp.core.job.BaseJobConfig
-import org.swasth.dp.search.functions.CompositeSearchFunction
-import org.swasth.dp.search.task.SearchConfig
-import org.swasth.fixture.EventFixture
+import org.healthflow.dp.core.job.BaseJobConfig
+import org.healthflow.dp.search.functions.CompositeSearchFunction
+import org.healthflow.dp.search.task.SearchConfig
+import org.healthflow.fixture.EventFixture
 
 import java.util
 

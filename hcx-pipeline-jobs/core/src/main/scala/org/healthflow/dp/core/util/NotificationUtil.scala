@@ -1,4 +1,4 @@
-package org.swasth.dp.core.util
+package org.healthflow.dp.core.util
 
 import java.io.{ByteArrayInputStream, IOException}
 import java.util

@@ -1,7 +1,7 @@
-package org.swasth.dp.core.util
+package org.healthflow.dp.core.util
 
 import io.jsonwebtoken.Jwts
-import org.swasth.dp.core.job.BaseJobConfig
+import org.healthflow.dp.core.job.BaseJobConfig
 
 import java.security.KeyFactory
 import java.security.spec.PKCS8EncodedKeySpec

@@ -1,10 +1,10 @@
-package org.swasth.spec
+package org.healthflow.spec
 
 import java.util
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.ProcessFunction
-import org.swasth.dp.core.job.{BaseProcessFunction, Metrics}
+import org.healthflow.dp.core.job.{BaseProcessFunction, Metrics}
 
 
 class TestMapStreamFunc(config: BaseProcessTestConfig)(implicit val stringTypeInfo: TypeInformation[String])

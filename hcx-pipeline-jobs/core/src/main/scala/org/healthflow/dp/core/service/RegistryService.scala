@@ -1,10 +1,10 @@
-package org.swasth.dp.core.service
+package org.healthflow.dp.core.service
 
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
-import org.swasth.dp.core.job.BaseJobConfig
-import org.swasth.dp.core.util.{Constants, HttpUtil, JSONUtil}
+import org.healthflow.dp.core.job.BaseJobConfig
+import org.healthflow.dp.core.util.{Constants, HttpUtil, JSONUtil}
 
 import java.util
 import scala.io.Source

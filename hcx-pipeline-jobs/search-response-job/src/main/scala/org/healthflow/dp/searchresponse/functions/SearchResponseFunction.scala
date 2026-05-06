@@ -1,14 +1,14 @@
-package org.swasth.dp.searchresponse.functions
+package org.healthflow.dp.searchresponse.functions
 
 import com.google.gson.Gson
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.slf4j.LoggerFactory
-import org.swasth.dp.core.function.{BaseDispatcherFunction, DispatcherResult, ValidationResult}
-import org.swasth.dp.core.job.Metrics
-import org.swasth.dp.core.util.{Constants, JSONUtil, PostgresConnect, PostgresConnectionConfig, TableNames}
-import org.swasth.dp.searchresponse.task.SearchResponseConfig
+import org.healthflow.dp.core.function.{BaseDispatcherFunction, DispatcherResult, ValidationResult}
+import org.healthflow.dp.core.job.Metrics
+import org.healthflow.dp.core.util.{Constants, JSONUtil, PostgresConnect, PostgresConnectionConfig, TableNames}
+import org.healthflow.dp.searchresponse.task.SearchResponseConfig
 
 import java.util
 import java.util.Calendar

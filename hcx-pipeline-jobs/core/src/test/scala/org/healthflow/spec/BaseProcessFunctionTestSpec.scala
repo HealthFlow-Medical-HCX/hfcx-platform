@@ -1,4 +1,4 @@
-package org.swasth.spec
+package org.healthflow.spec
 
 import java.util
 
@@ -12,8 +12,8 @@ import org.apache.flink.streaming.api.scala._
 import org.apache.flink.test.util.MiniClusterWithClientResource
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.scalatest.Matchers
-import org.swasth.dp.core.job.FlinkKafkaConnector
-import org.swasth.dp.core.util.FlinkUtil
+import org.healthflow.dp.core.job.FlinkKafkaConnector
+import org.healthflow.dp.core.util.FlinkUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

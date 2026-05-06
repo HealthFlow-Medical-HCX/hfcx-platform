@@ -1,4 +1,4 @@
-package org.swasth.dp.core.job
+package org.healthflow.dp.core.job
 
 import java.util
 
@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.streaming.api.scala.OutputTag
 import org.slf4j.LoggerFactory
-import org.swasth.dp.core.cache.DedupEngine
+import org.healthflow.dp.core.cache.DedupEngine
 
 trait BaseDeduplication {
 

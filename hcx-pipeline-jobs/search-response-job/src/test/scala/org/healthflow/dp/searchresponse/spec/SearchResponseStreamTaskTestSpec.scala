@@ -1,4 +1,4 @@
-package org.swasth.dp.searchresponse.spec
+package org.healthflow.dp.searchresponse.spec
 
 import com.google.gson.Gson
 import com.typesafe.config.{Config, ConfigFactory}
@@ -15,11 +15,11 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceCont
 import org.apache.flink.test.util.MiniClusterWithClientResource
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.swasth.dp.{BaseMetricsReporter, BaseTestSpec}
-import org.swasth.dp.core.job.FlinkKafkaConnector
-import org.swasth.dp.core.util.{PostgresConnect, PostgresConnectionConfig}
-import org.swasth.dp.searchresponse.task.{SearchResponseConfig, SearchResponseStreamTask}
-import org.swasth.fixture.EventFixture
+import org.healthflow.dp.{BaseMetricsReporter, BaseTestSpec}
+import org.healthflow.dp.core.job.FlinkKafkaConnector
+import org.healthflow.dp.core.util.{PostgresConnect, PostgresConnectionConfig}
+import org.healthflow.dp.searchresponse.task.{SearchResponseConfig, SearchResponseStreamTask}
+import org.healthflow.fixture.EventFixture
 
 import scala.collection.JavaConverters._
 

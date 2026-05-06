@@ -1,4 +1,4 @@
-package org.swasth.dp.core.job
+package org.healthflow.dp.core.job
 
 import java.util
 
@@ -6,7 +6,7 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, FlinkKafkaProducer}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.Semantic
-import org.swasth.dp.core.serde._
+import org.healthflow.dp.core.serde._
 
 class FlinkKafkaConnector(config: BaseJobConfig) extends Serializable {
 

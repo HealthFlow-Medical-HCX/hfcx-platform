@@ -11,7 +11,7 @@ import org.healthflow.dp.core.service.AuditService;
 import org.healthflow.dp.core.util.Constants;
 import org.healthflow.dp.core.util.DispatcherUtil;
 import org.healthflow.dp.core.util.JSONUtil;
-import org.swasth.dp.core.util.TableNames;
+import org.healthflow.dp.core.util.TableNames;
 import org.healthflow.dp.notification.task.NotificationConfig;
 
 import java.sql.PreparedStatement;

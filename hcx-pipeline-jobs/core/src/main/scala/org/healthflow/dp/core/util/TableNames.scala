@@ -1,4 +1,4 @@
-package org.swasth.dp.core.util
+package org.healthflow.dp.core.util
 
 /**
  * Allow-list for SQL table names used by the pipeline-jobs.
