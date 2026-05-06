@@ -77,6 +77,22 @@ After merging, comment on the PR with a one-paragraph close-out
 summarising what was done, test results, and any v1.<next> follow-ups
 the work surfaced.
 
+## SDK delivery (separate, multi-sprint track)
+
+SDK delivery for the four supported languages (Java, Python, .NET,
+JavaScript) is a separate, multi-sprint track tracked under
+`docs/strategy/sdk-delivery-plan.md` rather than as a single
+remediation gap. The plan document records owners, delivery targets,
+and the GA gate. Per-SDK work happens in dedicated repos
+(`hfcx-sdk-<language>`); this repo's per-gap PR discipline does not
+apply to SDK code, but the plan itself is updated via per-edit PRs
+against this repo.
+
+The pilot strategy works without all SDKs shipped — the platform
+team ships pilot partners a Java SDK pre-release. GA, by contrast,
+gates on the Java + Python SDKs both reaching 1.0.0. See the plan
+document for the full GA gate definition.
+
 ## Non-remediation contributions
 
 For ordinary feature, bug-fix, and refactoring work outside an active
