@@ -6,6 +6,11 @@ on:
 #    tags:
 #      - *
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   build:
     name: Build and Push Docker Image
@@ -54,9 +59,29 @@ jobs:
           tags: healthflow/api-gateway:${{ env.IMAGE_TAG }}_${{ github.run_number }}
           labels: api-gateway image
 
+      - name: Trivy image scan — api-gateway
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: healthflow/api-gateway:${{ env.IMAGE_TAG }}_${{ github.run_number }}
+          format: sarif
+          output: trivy-api-gateway.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "0"
+
+      - name: Upload Trivy SARIF — api-gateway
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-api-gateway.sarif
+          category: trivy-image-api-gateway
+
       - name: Configure AWS CLI
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+          # P0-1 follow-up: was hardcoded ap-south-1 (Mumbai). Defaults to
+          # me-south-1 (Bahrain) — closest GA AWS region to Egypt — and is
+          # overridable via the AWS_REGION repository variable.
+          aws-region: ${{ vars.AWS_REGION || 'me-south-1' }}
