@@ -17,6 +17,7 @@ import org.healthflow.common.exception.ErrorCodes;
 import org.healthflow.common.helpers.EventGenerator;
 import org.healthflow.common.utils.Constants;
 import org.healthflow.common.utils.NotificationUtils;
+import org.healthflow.common.utils.TableNames;
 import org.healthflow.hcx.handlers.EventHandler;
 import org.healthflow.kafka.client.IEventService;
 import org.healthflow.postgresql.IDatabaseService;
@@ -173,7 +174,21 @@ public class NotificationService {
     }
 
     private Map<String, String> insertRecords(String topicCode, String statusCode, List<String> senderList, String notificationRecipientCode) throws Exception {
-        //subscription_id,topic_code,sender_code,recipient_code,subscription_status,lastUpdatedOn,createdOn,expiry,is_delegated
+        // Gap V2 v1.4: was String.format with %s/%d for every value — converted to
+        // PreparedStatement parameter binding. Table identifier is the only
+        // interpolation, gated through TableNames.validate.
+        String table = TableNames.validate(postgresSubscription);
+        String query = "INSERT INTO " + table + " AS sub("
+                + "subscription_id,subscription_request_id,topic_code,sender_code,recipient_code,"
+                + "subscription_status,lastUpdatedOn,createdOn,expiry,is_delegated) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?) "
+                + "ON CONFLICT ON CONSTRAINT subscription_pkey DO UPDATE SET "
+                + "subscription_status = ?, lastUpdatedOn = ?, expiry = ?, is_delegated = ? "
+                + "WHERE sub.sender_code=EXCLUDED.sender_code "
+                + "AND sub.topic_code=EXCLUDED.topic_code "
+                + "AND sub.recipient_code=EXCLUDED.recipient_code "
+                + "RETURNING sub.subscription_id";
+
         Map<String, String> subscriptionMap = new HashMap<>();
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, subscriptionExpiry);
@@ -183,12 +198,15 @@ public class NotificationService {
             if (statusCode.equalsIgnoreCase(ACTIVE))
                 status = senderCode.equalsIgnoreCase(hcxRegistryCode) ? statusCode : PENDING;
             UUID subscriptionId = UUID.randomUUID();
-            String query = String.format(insertSubscription, postgresSubscription, subscriptionId, subRequestId, topicCode, senderCode,
-                    notificationRecipientCode, status, System.currentTimeMillis(), System.currentTimeMillis(), cal.getTimeInMillis(), false, status, System.currentTimeMillis(), cal.getTimeInMillis(), false);
-                ResultSet updateResult = (ResultSet) postgreSQLClient.executeQuery(query);
-                if (updateResult.next()) {
-                    subscriptionMap.put(senderCode, updateResult.getString(SUBSCRIPTION_ID));
-                }
+            long now = System.currentTimeMillis();
+            long expiry = cal.getTimeInMillis();
+            ResultSet updateResult = postgreSQLClient.executeQuery(query,
+                    subscriptionId.toString(), subRequestId.toString(), topicCode, senderCode,
+                    notificationRecipientCode, status, now, now, expiry, false,
+                    status, now, expiry, false);
+            if (updateResult.next()) {
+                subscriptionMap.put(senderCode, updateResult.getString(SUBSCRIPTION_ID));
+            }
         }
         LOG.info("Records inserted/Updated into DB");
         return subscriptionMap;
@@ -283,27 +301,44 @@ public class NotificationService {
     }
 
     private List<Subscription> fetchSubscriptions(NotificationListRequest request) throws Exception {
+        // Gap V2 v1.4: the previous implementation built the WHERE clause by
+        // concatenating user-controlled filter values with single-quote
+        // interpolation. The keys were allow-listed; the values were not.
+        // A request body with topic_code = "' OR '1'='1" broke out of the
+        // quote and bypassed the entire WHERE clause. Now: filter keys are
+        // still allow-listed, values are bound as ? parameters.
         ResultSet resultSet = null;
         List<Subscription> subscriptionList = null;
         Subscription subscription = null;
         Map<String, Object> filterMap = request.getFilters();
-        try { //subscription_id,subscription_status,topic_code,sender_code,recipient_code,expiry,is_delegated
-            String query = String.format(selectSubscription, postgresSubscription, request.getRecipientCode());
+        try {
+            String table = TableNames.validate(postgresSubscription);
+            StringBuilder queryBuilder = new StringBuilder(
+                    "SELECT subscription_id,subscription_request_id,subscription_status,"
+                  + "topic_code,sender_code,recipient_code,expiry,is_delegated "
+                  + "FROM " + table + " WHERE recipient_code = ?");
+            List<Object> params = new ArrayList<>();
+            params.add(request.getRecipientCode());
             if (!filterMap.isEmpty()) {
-                for (String key : filterMap.keySet()) {
+                for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
+                    String key = entry.getKey();
                     if (!allowedSubscriptionFilters.contains(key))
-                        throw new ClientException(ErrorCodes.ERR_INVALID_NOTIFICATION_REQ, MessageFormat.format(INVALID_SUBSCRIPTION_FILTERS, allowedSubscriptionFilters));
-                    query += " AND " + key + " = '" + filterMap.get(key) + "'";
+                        throw new ClientException(ErrorCodes.ERR_INVALID_NOTIFICATION_REQ,
+                                MessageFormat.format(INVALID_SUBSCRIPTION_FILTERS, allowedSubscriptionFilters));
+                    queryBuilder.append(" AND ").append(key).append(" = ?");
+                    params.add(entry.getValue());
                 }
             }
-            query += " ORDER BY lastUpdatedOn DESC";
+            queryBuilder.append(" ORDER BY lastUpdatedOn DESC");
+            // LIMIT and OFFSET: typed int values, not user strings. Most JDBC
+            // drivers don't allow binding to those slots; safe to interpolate.
             if (request.getLimit() > 0) {
-                query += " LIMIT " + request.getLimit();
+                queryBuilder.append(" LIMIT ").append(request.getLimit());
             }
             if (request.getOffset() > 0) {
-                query += " OFFSET " + request.getOffset();
+                queryBuilder.append(" OFFSET ").append(request.getOffset());
             }
-            resultSet = (ResultSet) postgreSQLClient.executeQuery(query);
+            resultSet = postgreSQLClient.executeQuery(queryBuilder.toString(), params.toArray());
             subscriptionList = new ArrayList<>();
             while (resultSet.next()) {
                 subscription = new Subscription(resultSet.getString(SUBSCRIPTION_ID), resultSet.getString(SUBSCRIPTION_REQUEST_ID), resultSet.getString(TOPIC_CODE), resultSet.getString(SUBSCRIPTION_STATUS),
@@ -317,11 +352,16 @@ public class NotificationService {
     }
 
     public Subscription getSubscriptionById(String subscriptionId, String senderCode) throws Exception {
+        // Gap V2 v1.4: was String.format with %s for both id and senderCode,
+        // letting any single-quote in either value break the SQL.
         ResultSet resultSet = null;
         Subscription subscription = null;
-        try { //subscription_id,subscription_status,topic_code,sender_code,recipient_code,expiry,is_delegated
-            String query = String.format(subscriptionSelectQuery, postgresSubscription, subscriptionId, senderCode);
-            resultSet = (ResultSet) postgreSQLClient.executeQuery(query);
+        try {
+            String table = TableNames.validate(postgresSubscription);
+            String query = "SELECT subscription_id,subscription_request_id,subscription_status,"
+                    + "topic_code,sender_code,recipient_code,expiry,is_delegated "
+                    + "FROM " + table + " WHERE subscription_id = ? AND sender_code = ?";
+            resultSet = postgreSQLClient.executeQuery(query, subscriptionId, senderCode);
             while (resultSet.next()) {
                 subscription = new Subscription(resultSet.getString(SUBSCRIPTION_ID), resultSet.getString(SUBSCRIPTION_REQUEST_ID), resultSet.getString(TOPIC_CODE), resultSet.getString(SUBSCRIPTION_STATUS),
                         resultSet.getString(Constants.SENDER_CODE), resultSet.getString(RECIPIENT_CODE), resultSet.getLong(EXPIRY), resultSet.getBoolean(IS_DELEGATED));
@@ -333,10 +373,13 @@ public class NotificationService {
     }
 
     private String updateSubscriptionById(String subscriptionId, String subscriptionStatus) throws Exception {
-        String query = String.format(updateSubscriptionQuery, postgresSubscription, subscriptionStatus, subscriptionId, SUBSCRIPTION_ID);
+        // Gap V2 v1.4: same pattern.
+        String table = TableNames.validate(postgresSubscription);
+        String query = "UPDATE " + table + " SET subscription_status = ? "
+                + "WHERE subscription_id = ? RETURNING " + SUBSCRIPTION_ID;
         ResultSet resultSet = null;
         try {
-            resultSet = (ResultSet) postgreSQLClient.executeQuery(query);
+            resultSet = postgreSQLClient.executeQuery(query, subscriptionStatus, subscriptionId);
             if (resultSet.next())
                 return resultSet.getString(SUBSCRIPTION_ID);
         } finally {
