@@ -8,7 +8,7 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.healthflow.dp.core.util.Constants;
-import org.swasth.dp.core.util.TableNames;
+import org.healthflow.dp.core.util.TableNames;
 import org.healthflow.dp.notification.task.NotificationConfig;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

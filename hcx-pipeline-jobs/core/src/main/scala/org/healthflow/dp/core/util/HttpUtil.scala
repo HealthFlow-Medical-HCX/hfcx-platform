@@ -1,4 +1,4 @@
-package org.swasth.dp.core.util
+package org.healthflow.dp.core.util
 
 import org.apache.http.client.HttpRequestRetryHandler
 import org.apache.http.client.config.{CookieSpecs, RequestConfig}

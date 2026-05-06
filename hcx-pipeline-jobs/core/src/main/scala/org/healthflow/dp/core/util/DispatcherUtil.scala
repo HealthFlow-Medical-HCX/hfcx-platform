@@ -1,12 +1,12 @@
-package org.swasth.dp.core.util
+package org.healthflow.dp.core.util
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpPost}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
-import org.swasth.dp.core.function.{DispatcherResult, ErrorResponse}
-import org.swasth.dp.core.job.BaseJobConfig
+import org.healthflow.dp.core.function.{DispatcherResult, ErrorResponse}
+import org.healthflow.dp.core.job.BaseJobConfig
 
 import java.nio.charset.StandardCharsets
 import java.util

@@ -1,4 +1,4 @@
-package org.swasth.dp.contentupdater.core.util
+package org.healthflow.dp.contentupdater.core.util
 
 import java.util
 

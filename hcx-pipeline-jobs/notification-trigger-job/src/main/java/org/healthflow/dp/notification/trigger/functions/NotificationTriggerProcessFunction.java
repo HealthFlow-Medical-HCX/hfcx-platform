@@ -10,7 +10,7 @@ import org.healthflow.dp.core.service.RegistryService;
 import org.healthflow.dp.core.util.*;
 import org.healthflow.dp.notification.trigger.task.NotificationTriggerConfig;
 
-import org.swasth.dp.core.util.TableNames;
+import org.healthflow.dp.core.util.TableNames;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

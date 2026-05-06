@@ -1,4 +1,4 @@
-package org.swasth.fixture
+package org.healthflow.fixture
 
 object EventFixture {
 

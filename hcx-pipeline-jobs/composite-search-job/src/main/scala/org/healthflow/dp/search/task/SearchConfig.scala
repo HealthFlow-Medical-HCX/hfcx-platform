@@ -1,7 +1,7 @@
-package org.swasth.dp.search.task
+package org.healthflow.dp.search.task
 
 import com.typesafe.config.Config
-import org.swasth.dp.core.job.BaseJobConfig
+import org.healthflow.dp.core.job.BaseJobConfig
 
 import java.util
 

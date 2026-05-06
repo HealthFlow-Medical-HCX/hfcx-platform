@@ -1,9 +1,9 @@
-package org.swasth.dp.core.util
+package org.healthflow.dp.core.util
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
-import org.swasth.dp.core.job.BaseJobConfig
+import org.healthflow.dp.core.job.BaseJobConfig
 import org.apache.flink.runtime.state.StateBackend
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig

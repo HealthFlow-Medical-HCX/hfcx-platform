@@ -1,4 +1,4 @@
-package org.swasth.spec
+package org.healthflow.spec
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}

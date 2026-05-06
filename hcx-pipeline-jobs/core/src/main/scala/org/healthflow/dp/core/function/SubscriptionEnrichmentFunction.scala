@@ -1,11 +1,11 @@
-package org.swasth.dp.core.function
+package org.healthflow.dp.core.function
 
 import org.apache.commons.collections.MapUtils
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.ProcessFunction
-import org.swasth.dp.core.job.{BaseJobConfig, BaseProcessFunction, Metrics}
-import org.swasth.dp.core.util.Constants
+import org.healthflow.dp.core.job.{BaseJobConfig, BaseProcessFunction, Metrics}
+import org.healthflow.dp.core.util.Constants
 
 import java.util
 

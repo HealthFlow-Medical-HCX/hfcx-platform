@@ -1,4 +1,4 @@
-package org.swasth.dp
+package org.healthflow.dp
 
 import org.apache.flink.api.scala.metrics.ScalaGauge
 import org.apache.flink.metrics.reporter.MetricReporter
