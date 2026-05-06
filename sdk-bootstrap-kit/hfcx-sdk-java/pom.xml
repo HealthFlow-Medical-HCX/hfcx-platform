@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Parent POM for the HealthFlow HFCX SDK for Java.
+
+  Coordinates: eg.gov.healthflow:hfcx-sdk-parent
+  Version:     1.0.0-SNAPSHOT (Sprint J1; the first published artifact is
+               1.0.0-SNAPSHOT to Sonatype OSSRH per the v1.4 V4 plan).
+
+  Three modules:
+    hfcx-sdk-core      — JWE, FHIR validation, Egyptian validators (extracted
+                         from the platform's hcx-core/hcx-common).
+    hfcx-sdk-client    — high-level HfcxClient API. Skeleton in J1, full
+                         implementation in J3-J6.
+    hfcx-sdk-examples  — runnable integration examples. Skeleton in J1.
+
+  Java target is 11 (matching the platform). Java 17 is the build JDK.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>eg.gov.healthflow</groupId>
+    <artifactId>hfcx-sdk-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>HealthFlow HFCX SDK for Java (parent)</name>
+    <description>Official Java SDK for the HealthFlow HFCX platform —
+        Egypt's open protocol for decentralised health-claims data exchange.</description>
+    <url>https://github.com/HealthFlow-Medical-HCX/hfcx-sdk-java</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/HealthFlow-Medical-HCX/hfcx-sdk-java.git</connection>
+        <developerConnection>scm:git:git@github.com:HealthFlow-Medical-HCX/hfcx-sdk-java.git</developerConnection>
+        <url>https://github.com/HealthFlow-Medical-HCX/hfcx-sdk-java</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>healthflow-eng</id>
+            <name>HealthFlow Engineering</name>
+            <email>engineering@healthflow.gov.eg</email>
+            <organization>HealthFlow Medical</organization>
+            <organizationUrl>https://healthflow.gov.eg</organizationUrl>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>hfcx-sdk-core</module>
+        <module>hfcx-sdk-client</module>
+        <module>hfcx-sdk-examples</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <!-- Pinned per the platform's hcx-core/hcx-common — see Decision 14
+             on RSA-OAEP-256 + A256GCM. A bump must be a deliberate review. -->
+        <nimbus-jose.version>9.40</nimbus-jose.version>
+        <hapi-fhir.version>6.10.5</hapi-fhir.version>
+        <jackson.version>2.16.1</jackson.version>
+        <slf4j.version>2.0.9</slf4j.version>
+
+        <junit.version>5.10.1</junit.version>
+        <mockito.version>5.7.0</mockito.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbus-jose.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-r4</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.6.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.13</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <!--
+          The 'release' profile is the one used by Sonatype OSSRH publishing.
+          Activate via -P release in CI (workflows/publish.yml).
+
+          TODO(human): before the 1.0.0 final release the human must:
+            1. Create an OSSRH account, request the eg.gov.healthflow groupId.
+            2. Set up GPG signing key in the org's secret store.
+            3. Wire OSSRH_USERNAME / OSSRH_PASSWORD / GPG_PRIVATE_KEY /
+               GPG_PASSPHRASE secrets into the hfcx-sdk-java repo.
+            4. Verify the SNAPSHOT publishes successfully before tagging
+               1.0.0 final.
+          See sdk-bootstrap-kit/hfcx-sdk-java/BOOTSTRAP.md for the full
+          checklist.
+        -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals><goal>jar-no-fork</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals><goal>jar</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals><goal>sign</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+</project>

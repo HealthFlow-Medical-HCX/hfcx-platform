@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sprint J1 acceptance criterion 4: a downstream Maven project, NOT in
+  the parent reactor, imports the published `hfcx-sdk-core` artifact
+  and successfully invokes JWEHelper.encrypt(...).
+
+  This project is intentionally outside the parent's <modules> list. To
+  run it after Sonatype publishes the SNAPSHOT:
+
+    cd tests/integration/consumer-smoketest
+    mvn -B test
+
+  The pom uses the Sonatype snapshots repo so it pulls the freshly-
+  published artifact rather than the locally-built one.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>eg.gov.healthflow.smoketest</groupId>
+    <artifactId>consumer-smoketest</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <name>Consumer smoketest for hfcx-sdk-core</name>
+    <description>Sprint J1 verification — proves a downstream Maven
+        project can consume the published SDK artifact.</description>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <hfcx-sdk.version>1.0.0-SNAPSHOT</hfcx-sdk.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>ossrh-snapshots</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>false</enabled></releases>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>eg.gov.healthflow</groupId>
+            <artifactId>hfcx-sdk-core</artifactId>
+            <version>${hfcx-sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

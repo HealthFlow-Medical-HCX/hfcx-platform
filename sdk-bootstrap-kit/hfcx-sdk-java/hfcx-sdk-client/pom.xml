@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  hfcx-sdk-client — high-level HfcxClient API. Skeleton in J1; full
+  implementation lands in J3 (HfcxClient skeleton + correlation IDs),
+  J4 (outbound encryption), J5 (recipient handler), J6 (error taxonomy).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>eg.gov.healthflow</groupId>
+        <artifactId>hfcx-sdk-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>hfcx-sdk-client</artifactId>
+    <name>HealthFlow HFCX SDK for Java (client)</name>
+    <description>HfcxClient builder API and protocol-header construction.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>eg.gov.healthflow</groupId>
+            <artifactId>hfcx-sdk-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

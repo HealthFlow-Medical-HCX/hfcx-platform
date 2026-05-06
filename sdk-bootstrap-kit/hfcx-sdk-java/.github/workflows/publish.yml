@@ -1,0 +1,60 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# TODO(human): the secrets referenced below must be configured in
+# GitHub Settings → Secrets and variables → Actions before the first
+# tagged release can succeed:
+#   OSSRH_USERNAME       — Sonatype OSSRH username
+#   OSSRH_TOKEN          — Sonatype OSSRH user token (NOT password)
+#   GPG_PRIVATE_KEY      — ASCII-armored GPG private key for signing
+#   GPG_PASSPHRASE       — passphrase for the GPG key
+# See BOOTSTRAP.md for the full Sonatype + GPG procedure.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Verify required secrets are present
+        # Fail-fast with a clear message if the human-ops setup hasn't
+        # happened yet. Better than a confusing GPG signing error 5
+        # minutes into the build.
+        run: |
+          set -euo pipefail
+          missing=""
+          [[ -z "${OSSRH_USERNAME:-}" ]] && missing="$missing OSSRH_USERNAME"
+          [[ -z "${OSSRH_TOKEN:-}" ]] && missing="$missing OSSRH_TOKEN"
+          [[ -z "${GPG_PASSPHRASE:-}" ]] && missing="$missing GPG_PASSPHRASE"
+          if [[ -n "$missing" ]]; then
+            echo "::error::Missing required secrets:$missing"
+            echo "::error::See BOOTSTRAP.md → 'Sonatype OSSRH setup' for the procedure."
+            exit 1
+          fi
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Publish to Sonatype OSSRH
+        run: mvn -B -P release deploy
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

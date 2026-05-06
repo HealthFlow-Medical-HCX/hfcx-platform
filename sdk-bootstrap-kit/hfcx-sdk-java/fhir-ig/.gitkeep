@@ -1,0 +1,2 @@
+# Placeholder so the directory exists in git before the first IG sync
+# (run `bash fhir-ig/sync.sh <platform-tag>` to fetch the real artifact).
