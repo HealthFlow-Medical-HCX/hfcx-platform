@@ -102,6 +102,17 @@
             <version>9.40</version>
         </dependency>
         <!--
+          P0-2.a — HashiCorp Vault key custody. Apache 2.0. Optional dep:
+          consuming services pull spring-vault-core explicitly when they wire
+          VaultKeyCustodyClient. Other services don't get the transitive bloat.
+        -->
+        <dependency>
+            <groupId>org.springframework.vault</groupId>
+            <artifactId>spring-vault-core</artifactId>
+            <version>2.3.4</version>
+            <optional>true</optional>
+        </dependency>
+        <!--
           P0-5 — FHIR R4 validation per Integration Guide §29.
           HAPI-FHIR 6.10.5: last Java-11-compatible release, Apache 2.0.
           Validates against the base R4 spec out of the box; the HealthFlow
@@ -154,7 +165,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.7</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
