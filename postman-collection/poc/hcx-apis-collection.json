@@ -128,14 +128,14 @@
 							]
 						},
 						"url": {
-							"raw": "{{keycloak_host}}/auth/realms/healthflow-hcx-egypt/protocol/openid-connect/token",
+							"raw": "{{keycloak_host}}/auth/realms/hcx-egypt/protocol/openid-connect/token",
 							"host": [
 								"{{keycloak_host}}"
 							],
 							"path": [
 								"auth",
 								"realms",
-								"healthflow-hcx-egypt",
+								"hcx-egypt",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -197,14 +197,14 @@
 							]
 						},
 						"url": {
-							"raw": "{{keycloak_host}}/auth/realms/healthflow-hcx-egypt/protocol/openid-connect/token",
+							"raw": "{{keycloak_host}}/auth/realms/hcx-egypt/protocol/openid-connect/token",
 							"host": [
 								"{{keycloak_host}}"
 							],
 							"path": [
 								"auth",
 								"realms",
-								"healthflow-hcx-egypt",
+								"hcx-egypt",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -266,14 +266,14 @@
 							]
 						},
 						"url": {
-							"raw": "{{keycloak_host}}/auth/realms/healthflow-hcx-egypt/protocol/openid-connect/token",
+							"raw": "{{keycloak_host}}/auth/realms/hcx-egypt/protocol/openid-connect/token",
 							"host": [
 								"{{keycloak_host}}"
 							],
 							"path": [
 								"auth",
 								"realms",
-								"healthflow-hcx-egypt",
+								"hcx-egypt",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -335,14 +335,14 @@
 							]
 						},
 						"url": {
-							"raw": "{{keycloak_host}}/auth/realms/healthflow-hcx-egypt/protocol/openid-connect/token",
+							"raw": "{{keycloak_host}}/auth/realms/hcx-egypt/protocol/openid-connect/token",
 							"host": [
 								"{{keycloak_host}}"
 							],
 							"path": [
 								"auth",
 								"realms",
-								"healthflow-hcx-egypt",
+								"hcx-egypt",
 								"protocol",
 								"openid-connect",
 								"token"

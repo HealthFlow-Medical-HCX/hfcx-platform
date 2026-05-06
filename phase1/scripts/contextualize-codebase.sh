@@ -208,9 +208,14 @@ update_api_endpoints() {
 update_keycloak_config() {
   log "Updating Keycloak configuration"
   
+  # Gap V3 v1.4: corrected realm slug. Earlier runs of this script wrote
+  # 'healthflow-hcx-egypt' which did not match the realm declared in
+  # deployment/keycloak/hcx-egypt-realm.json. The realm slug is 'hcx-egypt';
+  # the participant instance name (a different concept) is
+  # 'healthflow-hcx-egypt' and remains unchanged elsewhere.
   replace_in_files \
     "swasth-health-claim-exchange" \
-    "healthflow-hcx-egypt" \
+    "hcx-egypt" \
     "*.{yml,yaml,properties,json}" \
     "Keycloak realm names"
   
@@ -332,7 +337,7 @@ This report summarizes the automated contextualization of the HCX codebase from 
 - **Documentation**: \`docs.swasth.app\` → \`docs.healthflow.eg\`
 
 ### 4. Keycloak Configuration
-- **Realm**: \`swasth-health-claim-exchange\` → \`healthflow-hcx-egypt\`
+- **Realm**: \`swasth-health-claim-exchange\` → \`hcx-egypt\`
 - **Client ID**: \`swasth-hcx-gateway\` → \`healthflow-hcx-gateway\`
 
 ### 5. Frontend Branding

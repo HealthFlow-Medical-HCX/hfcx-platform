@@ -67,6 +67,12 @@ jwt:
 keycloak:
   baseUrl: ${KEYCLOAK_BASE_URL:http://hcx-keycloak.healthflow.local:8080/auth}
   realm: ${KEYCLOAK_REALM:hcx-egypt}
+  # Gap V3 v1.4 — RealmAssertion verifies at ApplicationReadyEvent that
+  # keycloak.realm matches the realm extracted from jwt.jwkUrl. With
+  # assert-strict=true, a mismatch throws IllegalStateException and aborts
+  # startup. Default is false so local dev with a stub JWK URL still boots;
+  # production-like profiles should override to true.
+  realm-assert-strict: ${KEYCLOAK_REALM_ASSERT_STRICT:false}
 
 redis:
   host: ${REDIS_HOST:localhost}
