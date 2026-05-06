@@ -14,6 +14,30 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      # Gap V1 v1.4 — block any commit that re-introduces a base64-encoded
+      # RSA/EC private key in source. The pattern matches the PKCS#8 RSA
+      # private-key DER prefix and a minimum length to avoid false-positives
+      # on short MII... base64 strings. Documented exceptions:
+      #   - docs/security/         describes historical leaks; expected to mention
+      #                            the key shape in prose.
+      #   - tests/                 integration-test fixtures.
+      #   - any line containing the literal "kept intentionally" — the
+      #     v1.3/v1.4 annotation marker for provenance hits.
+      - name: Block embedded private keys
+        run: |
+          set -euo pipefail
+          HITS=$(grep -rEn "MIIE[A-Za-z0-9+/]{40,}" \
+            --include="*.yml" --include="*.yaml" --include="*.properties" \
+            --include="*.java" --include="*.scala" --include="*.json" \
+            --exclude-dir=docs/security \
+            --exclude-dir=tests \
+            . 2>/dev/null | grep -v "kept intentionally" || true)
+          if [[ -n "$HITS" ]]; then
+            echo "::error::Embedded private keys detected:"
+            echo "$HITS"
+            echo "::error::See docs/security/known-leaked-credentials.md for context."
+            exit 1
+          fi
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
