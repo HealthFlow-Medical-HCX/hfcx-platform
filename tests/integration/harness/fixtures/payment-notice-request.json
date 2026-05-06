@@ -1,0 +1,44 @@
+{
+  "resourceType": "Bundle",
+  "id": "PaymentNoticeBundle-fixture-001",
+  "meta": {
+    "lastUpdated": "2026-05-06T08:00:00.000+00:00",
+    "profile": [
+      "https://ig.hcxprotocol.io/v0.7.1/StructureDefinition-PaymentNoticeBundle.html"
+    ]
+  },
+  "type": "document",
+  "timestamp": "2026-05-06T08:00:00.000+00:00",
+  "entry": [
+    {
+      "fullUrl": "Composition/CompositionExample-PN-01",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "CompositionExample-PN-01",
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "https://fhir.loinc.org",
+              "code": "76301-1",
+              "display": "Payment notice"
+            }
+          ]
+        },
+        "title": "Payment Notice"
+      }
+    },
+    {
+      "fullUrl": "PaymentNotice/PaymentNoticeExample-01",
+      "resource": {
+        "resourceType": "PaymentNotice",
+        "id": "PaymentNoticeExample-01",
+        "status": "active",
+        "created": "2026-05-06",
+        "payment": {"reference": "PaymentReconciliation/PR-01"},
+        "amount": {"value": 1500.00, "currency": "EGP"},
+        "recipient": {"reference": "Organization/OrgExample-02"}
+      }
+    }
+  ]
+}
