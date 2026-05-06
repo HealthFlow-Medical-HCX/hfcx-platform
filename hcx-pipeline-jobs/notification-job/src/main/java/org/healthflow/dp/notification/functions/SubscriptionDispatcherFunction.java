@@ -11,8 +11,10 @@ import org.healthflow.dp.core.service.AuditService;
 import org.healthflow.dp.core.util.Constants;
 import org.healthflow.dp.core.util.DispatcherUtil;
 import org.healthflow.dp.core.util.JSONUtil;
+import org.swasth.dp.core.util.TableNames;
 import org.healthflow.dp.notification.task.NotificationConfig;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -57,14 +59,24 @@ public class SubscriptionDispatcherFunction extends BaseNotificationFunction {
     }
 
     private boolean hasPendingResponses(String subscriptionId) throws SQLException {
-        String query = String.format("SELECT count(%s) FROM %s WHERE %s IN (SELECT DISTINCT %s from %s WHERE %s = '%s') AND %s = 'Pending' ",
-                Constants.SUBSCRIPTION_REQUEST_ID(), config.subscriptionTableName, Constants.SUBSCRIPTION_REQUEST_ID(), Constants.SUBSCRIPTION_REQUEST_ID(),
-                config.subscriptionTableName, Constants.SUBSCRIPTION_ID(), subscriptionId, Constants.SUBSCRIPTION_STATUS());
-        ResultSet resultSet = postgresConnect.executeQuery(query);
-        while (resultSet.next()) {
-            int pendingCount = resultSet.getInt("count");
-            if (pendingCount > 0)
-                return true;
+        // Allow-list the table name; bind subscriptionId via the PreparedStatement.
+        String table = TableNames.validate(config.subscriptionTableName);
+        String query = "SELECT count(" + Constants.SUBSCRIPTION_REQUEST_ID() + ")"
+                + " FROM " + table
+                + " WHERE " + Constants.SUBSCRIPTION_REQUEST_ID() + " IN ("
+                + " SELECT DISTINCT " + Constants.SUBSCRIPTION_REQUEST_ID()
+                + " FROM " + table
+                + " WHERE " + Constants.SUBSCRIPTION_ID() + " = ?)"
+                + " AND " + Constants.SUBSCRIPTION_STATUS() + " = 'Pending'";
+        try (PreparedStatement ps = postgresConnect.getConnection().prepareStatement(query)) {
+            ps.setString(1, subscriptionId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    int pendingCount = resultSet.getInt("count");
+                    if (pendingCount > 0)
+                        return true;
+                }
+            }
         }
         return false;
     }

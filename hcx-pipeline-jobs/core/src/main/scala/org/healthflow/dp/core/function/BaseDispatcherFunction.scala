@@ -48,9 +48,12 @@ abstract class BaseDispatcherFunction(config: BaseJobConfig)
   def getPayload(payloadRefId: String): util.Map[String, AnyRef] = {
     Console.println("Fetching payload from postgres for mid: " + payloadRefId)
     logger.info("Fetching payload from postgres for mid: " + payloadRefId)
-    val postgresQuery = String.format("SELECT data FROM %s WHERE mid = '%s'", config.postgresTable, payloadRefId);
+    // Table name cannot be parameterized in JDBC; validate against the allow-list
+    // and bind data values via the PreparedStatement parameter slot.
+    val postgresQuery = "SELECT data FROM " + TableNames.validate(config.postgresTable) + " WHERE mid = ?"
     val preparedStatement = postgresConnect.getConnection.prepareStatement(postgresQuery)
     try {
+      preparedStatement.setString(1, payloadRefId)
       val resultSet = preparedStatement.executeQuery()
       if (resultSet.next()) {
         val payload = resultSet.getString(1)

@@ -1,9 +1,13 @@
 package org.healthflow.hcx.utils.validators;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.healthflow.common.exception.ClientException;
 import org.healthflow.common.exception.ErrorCodes;
 import org.healthflow.hcx.enums.EgyptianGovernorate;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -30,7 +34,122 @@ public final class EgyptianFieldValidator {
     /** Meeza wallet card — 16 digits. */
     private static final Pattern MEEZA_PATTERN = Pattern.compile("^\\d{16}$");
 
+    /** URI of the Egyptian National-ID identifier system. */
+    private static final String NATIONAL_ID_SYSTEM =
+            "http://healthflow.gov.eg/identifier/national-id";
+
     private EgyptianFieldValidator() {
+    }
+
+    /**
+     * Walk a FHIR Bundle and validate every Egypt-specific field embedded in
+     * its entries.
+     *
+     * <p>Per Decision 14, this runs at the recipient HCX-API instance after the
+     * inbound JWE has been decrypted. The Bundle is the cleartext payload.
+     *
+     * <p>For each entry resource:
+     * <ul>
+     *   <li>{@code Patient} — the National-ID identifier slice (system =
+     *       http://healthflow.gov.eg/identifier/national-id) is checked with
+     *       the full Luhn-style validator.</li>
+     *   <li>{@code Patient.telecom} / {@code Practitioner.telecom} — phone
+     *       contacts are validated when the resource address country is EG
+     *       (or absent — the platform is Egypt-only by deployment).</li>
+     *   <li>{@code Organization.payment} (FHIR-extension namespace) — IBANs are
+     *       checked against the Egyptian mod-97 algorithm.</li>
+     * </ul>
+     *
+     * <p>Returns a list of human-readable errors. An empty list means the
+     * Bundle passed Egyptian field checks. The caller decides whether to
+     * raise on the first error or aggregate.
+     *
+     * <p>Tolerates JSON shapes that are not actually Bundles (e.g. a single
+     * resource): walks {@code resourceType=Bundle.entry[*].resource} when
+     * present, otherwise treats the root as a single resource.
+     */
+    public static List<String> validateFhirBundle(JsonNode root) {
+        if (root == null || root.isMissingNode() || root.isNull()) {
+            return Collections.emptyList();
+        }
+        List<String> errors = new ArrayList<>();
+        if ("Bundle".equals(textOrEmpty(root.path("resourceType"))) && root.has("entry")) {
+            for (JsonNode entry : root.path("entry")) {
+                JsonNode resource = entry.path("resource");
+                if (resource.isMissingNode() || resource.isNull()) continue;
+                validateResource(resource, errors);
+            }
+        } else {
+            validateResource(root, errors);
+        }
+        return errors;
+    }
+
+    private static void validateResource(JsonNode resource, List<String> errors) {
+        String type = textOrEmpty(resource.path("resourceType"));
+        switch (type) {
+            case "Patient":
+                validatePatient(resource, errors);
+                break;
+            case "Practitioner":
+                validateTelecoms(resource.path("telecom"), "Practitioner", errors);
+                break;
+            case "Organization":
+                validateOrganization(resource, errors);
+                break;
+            default:
+                // No Egyptian-specific checks for other resource types yet.
+        }
+    }
+
+    private static void validatePatient(JsonNode patient, List<String> errors) {
+        // National ID identifier slice
+        for (JsonNode identifier : patient.path("identifier")) {
+            String system = textOrEmpty(identifier.path("system"));
+            if (NATIONAL_ID_SYSTEM.equals(system)) {
+                String value = textOrEmpty(identifier.path("value"));
+                if (value.isEmpty()) {
+                    errors.add("Patient.identifier[system=national-id].value is missing");
+                } else if (!EgyptianNationalIDValidator.isValid(value)) {
+                    errors.add("Patient.identifier[system=national-id].value '" + value
+                            + "' is not a valid Egyptian National ID");
+                }
+            }
+        }
+        validateTelecoms(patient.path("telecom"), "Patient", errors);
+    }
+
+    private static void validateOrganization(JsonNode org, List<String> errors) {
+        validateTelecoms(org.path("telecom"), "Organization", errors);
+        // Some payment extensions store an iban field at the resource root.
+        for (JsonNode extension : org.path("extension")) {
+            String url = textOrEmpty(extension.path("url"));
+            if (url.toLowerCase().contains("iban")) {
+                String iban = textOrEmpty(extension.path("valueString"));
+                if (!iban.isEmpty() && !EgyptianIBANValidator.isValid(iban)) {
+                    errors.add("Organization extension[" + url + "] '" + iban
+                            + "' is not a valid Egyptian IBAN");
+                }
+            }
+        }
+    }
+
+    private static void validateTelecoms(JsonNode telecoms, String resourceType, List<String> errors) {
+        if (telecoms == null || !telecoms.isArray()) return;
+        for (JsonNode tel : telecoms) {
+            String system = textOrEmpty(tel.path("system"));
+            if (!"phone".equalsIgnoreCase(system)) continue;
+            String value = textOrEmpty(tel.path("value"));
+            if (value.isEmpty()) continue;
+            if (!EgyptianPhoneValidator.isValid(value)) {
+                errors.add(resourceType + ".telecom[system=phone].value '" + value
+                        + "' is not a valid Egyptian phone number");
+            }
+        }
+    }
+
+    private static String textOrEmpty(JsonNode n) {
+        return n == null || n.isMissingNode() || n.isNull() ? "" : n.asText("");
     }
 
     /**

@@ -7,7 +7,7 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.slf4j.LoggerFactory
 import org.swasth.dp.core.function.{BaseDispatcherFunction, DispatcherResult, ValidationResult}
 import org.swasth.dp.core.job.Metrics
-import org.swasth.dp.core.util.{Constants, JSONUtil, PostgresConnect, PostgresConnectionConfig}
+import org.swasth.dp.core.util.{Constants, JSONUtil, PostgresConnect, PostgresConnectionConfig, TableNames}
 import org.swasth.dp.searchresponse.task.SearchResponseConfig
 
 import java.util
@@ -180,11 +180,17 @@ class SearchResponseFunction(config: SearchResponseConfig)(implicit val stringTy
 
   @throws[Exception]
   def updateSearchRecord(correlationId: String, apiCallId: String, status: String, searchResponse: util.Map[String, AnyRef]): Unit = {
-    val query = String.format("UPDATE %s SET response_status ='%s',response_data=?::JSON WHERE correlation_id='%s' AND apicall_id='%s'", config.searchTable, status, correlationId, apiCallId)
+    // Allow-list the table identifier; every data value is bound through the
+    // PreparedStatement parameter slots rather than interpolated into the SQL.
+    val query = "UPDATE " + TableNames.validate(config.searchTable) +
+      " SET response_status = ?, response_data = ?::JSON WHERE correlation_id = ? AND apicall_id = ?"
     val preStatement = postgresConnect.connection.prepareStatement(query)
     try {
       postgresConnect.connection.setAutoCommit(false)
-      preStatement.setObject(1, JSONUtil.serialize(searchResponse))
+      preStatement.setString(1, status)
+      preStatement.setObject(2, JSONUtil.serialize(searchResponse))
+      preStatement.setString(3, correlationId)
+      preStatement.setString(4, apiCallId)
       preStatement.executeUpdate
       System.out.println("Update operation completed successfully for correlationId:" + correlationId + " and apiCallId:" + apiCallId)
       postgresConnect.connection.commit()
@@ -197,9 +203,12 @@ class SearchResponseFunction(config: SearchResponseConfig)(implicit val stringTy
   @throws[Exception]
   def getBaseRecord(correlationId: String): CompositeSearch = {
     System.out.println("Fetching base record from postgres for correlationId: " + correlationId)
-    val postgresQuery = String.format("SELECT apicall_id,sender_code,response_status FROM %s WHERE recipient_code IS NULL and correlation_id = '%s'", config.searchTable, correlationId)
+    val postgresQuery = "SELECT apicall_id,sender_code,response_status FROM " +
+      TableNames.validate(config.searchTable) +
+      " WHERE recipient_code IS NULL AND correlation_id = ?"
     val preparedStatement = postgresConnect.getConnection.prepareStatement(postgresQuery)
     try {
+      preparedStatement.setString(1, correlationId)
       val resultSet = preparedStatement.executeQuery
       if (resultSet.next) {
         CompositeSearch(correlationId, resultSet.getString(1), resultSet.getString(2), resultSet.getString(3), null)
@@ -215,9 +224,12 @@ class SearchResponseFunction(config: SearchResponseConfig)(implicit val stringTy
   @throws[Exception]
   def fetchAllSearchRecords(correlationId: String): util.List[CompositeSearch] = {
     System.out.println("Fetching all records from postgres for correlationId: " + correlationId)
-    val postgresQuery = String.format("SELECT apicall_id,sender_code,response_status,response_data FROM %s WHERE recipient_code IS NOT NULL AND correlation_id = '%s'", config.searchTable, correlationId)
+    val postgresQuery = "SELECT apicall_id,sender_code,response_status,response_data FROM " +
+      TableNames.validate(config.searchTable) +
+      " WHERE recipient_code IS NOT NULL AND correlation_id = ?"
     val preparedStatement = postgresConnect.getConnection.prepareStatement(postgresQuery)
     try {
+      preparedStatement.setString(1, correlationId)
       val resultSet = preparedStatement.executeQuery
       val searchList = new util.ArrayList[CompositeSearch]
       while (resultSet.next) {

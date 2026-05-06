@@ -10,6 +10,9 @@ import org.healthflow.dp.core.service.RegistryService;
 import org.healthflow.dp.core.util.*;
 import org.healthflow.dp.notification.trigger.task.NotificationTriggerConfig;
 
+import org.swasth.dp.core.util.TableNames;
+
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -99,16 +102,22 @@ public class NotificationTriggerProcessFunction extends ProcessFunction<Map<Stri
         String senderCode = (String) cdata.get(Constants.HCX_SENDER_CODE());
         String notifyEvent;
         List<String> subscriptions = new ArrayList<>();
-        ResultSet resultSet = null;
-        try {
-            String query = String.format("SELECT %s from %s WHERE %s = '%s' AND %s = '%s' AND %s = '%s'", Constants.SUBSCRIPTION_ID(),
-                    config.subscriptionTableName, Constants.SENDER_CODE(), senderCode, Constants.TOPIC_CODE(), topicCode, Constants.SUBSCRIPTION_STATUS(), Constants.ACTIVE());
-            resultSet = postgresConnect.executeQuery(query);
-            while (resultSet.next()) {
-                subscriptions.add(resultSet.getString(Constants.SUBSCRIPTION_ID()));
+        // Table name cannot be parameterized in JDBC; validate it against the allow-list
+        // and bind every data value via PreparedStatement.setX(...).
+        String query = "SELECT " + Constants.SUBSCRIPTION_ID()
+                + " FROM " + TableNames.validate(config.subscriptionTableName)
+                + " WHERE " + Constants.SENDER_CODE() + " = ?"
+                + " AND " + Constants.TOPIC_CODE() + " = ?"
+                + " AND " + Constants.SUBSCRIPTION_STATUS() + " = ?";
+        try (PreparedStatement ps = postgresConnect.getConnection().prepareStatement(query)) {
+            ps.setString(1, senderCode);
+            ps.setString(2, topicCode);
+            ps.setString(3, Constants.ACTIVE());
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    subscriptions.add(resultSet.getString(Constants.SUBSCRIPTION_ID()));
+                }
             }
-        } finally {
-            if (resultSet != null) resultSet.close();
         }
         if (!subscriptions.isEmpty()) {
             Map<String, Object> participant = registryService.getParticipantDetails("{\"participant_code\":{\"eq\":\"" + senderCode + "\"}}").get(0);

@@ -1,0 +1,61 @@
+name: FHIR IG Build
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'fhir/egyptian-ig/**'
+      - '.github/workflows/fhir-ig-build.yml'
+  pull_request:
+    paths:
+      - 'fhir/egyptian-ig/**'
+      - '.github/workflows/fhir-ig-build.yml'
+
+jobs:
+  build-ig:
+    name: Build HealthFlow Egyptian IG
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install SUSHI
+        run: npm install -g fsh-sushi
+
+      - name: Verify SUSHI
+        run: sushi --version
+
+      - name: Make build.sh executable
+        run: chmod +x fhir/egyptian-ig/build.sh
+
+      - name: Build IG
+        run: bash fhir/egyptian-ig/build.sh
+
+      - name: Upload IG package
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthflow-egyptian-ig-package
+          path: fhir/egyptian-ig/output/package.tgz
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload full IG output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthflow-egyptian-ig-output
+          path: fhir/egyptian-ig/output/
+          if-no-files-found: warn
+          retention-days: 7

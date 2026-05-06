@@ -20,5 +20,7 @@ public enum ErrorCodes {
     ERR_UPDATE_PARTICIPANT_DETAILS,
     ERR_INVALID_ONBOARD_STATUS,
     ERR_MAXIMUM_OTP_REGENERATE,
-    ERR_INVALID_CERTIFICATE
+    ERR_INVALID_CERTIFICATE,
+    /** Egyptian-specific field (National-ID, IBAN, phone, governorate) failed validation. */
+    ERR_INVALID_EGYPTIAN_IDENTIFIER
 }

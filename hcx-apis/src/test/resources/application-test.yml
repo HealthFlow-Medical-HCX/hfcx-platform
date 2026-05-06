@@ -1,6 +1,19 @@
 #kafka config
 bootstrap-servers: ${bootstrap_servers:localhost:9092}
 
+# Decision 14 — recipient-side JWE/FHIR/Egyptian validation feature flags.
+# All three are OFF in the test profile so legacy WebMvcTest fixtures (which
+# carry mock JWE-shaped strings, not real ciphertext) flow through unchanged.
+crypto:
+  jwe:
+    enabled: ${crypto_jwe_enabled:false}
+fhir:
+  validation:
+    enabled: ${fhir_validation_enabled:false}
+egyptian:
+  validation:
+    enabled: ${egyptian_validation_enabled:false}
+
 kafka:
   topic:
     payload: ${kafka_payload_topic:local.hcx.request.payload}
