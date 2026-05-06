@@ -74,7 +74,7 @@ import static org.healthflow.common.utils.Constants.*;
     private Map<String,Object> getNotificationRequest() throws JsonProcessingException {
         Map<String,Object> obj = new HashMap<>();
         Map<String,Object> notificationHeaders = new HashMap<>();
-        notificationHeaders.put(SENDER_CODE, "hcx-apollo-12345");
+        notificationHeaders.put(SENDER_CODE, "provider01.alex_med@healthflow-hcx-test.gov.eg");
         notificationHeaders.put(RECIPIENT_TYPE, PARTICIPANT_CODE);
         notificationHeaders.put(RECIPIENTS, List.of("test-user@hcx"));
         notificationHeaders.put("correlation_id", "1234");
@@ -86,7 +86,7 @@ import static org.healthflow.common.utils.Constants.*;
      private Map<String,Object> getInvalidCorrIdNotificationRequest() throws JsonProcessingException {
          Map<String,Object> obj = new HashMap<>();
          Map<String,Object> notificationHeaders = new HashMap<>();
-         notificationHeaders.put(SENDER_CODE, "hcx-apollo-12345");
+         notificationHeaders.put(SENDER_CODE, "provider01.alex_med@healthflow-hcx-test.gov.eg");
          notificationHeaders.put(RECIPIENT_TYPE, PARTICIPANT_CODE);
          notificationHeaders.put(RECIPIENTS, List.of("test-user@hcx"));
          notificationHeaders.put("correlation_id", "8c365958-9d3e-4e00-ac58-e6a7c837b74c");
@@ -99,7 +99,7 @@ import static org.healthflow.common.utils.Constants.*;
      public void testSubscriptionPayload() throws Exception {
          Request request = new Request(getSubscriptionRequest(), NOTIFICATION_SUBSCRIBE);
          assertEquals("hcx-notification-001",request.getTopicCode());
-         assertEquals("hcx-apollo-12345", request.getRecipientCode());
+         assertEquals("provider01.alex_med@healthflow-hcx-test.gov.eg", request.getRecipientCode());
          assertEquals(2,request.getSenderList().size());
          assertEquals("Payor1",request.getSenderList().get(0));
          assertEquals("Payor2",request.getSenderList().get(1));
@@ -107,7 +107,7 @@ import static org.healthflow.common.utils.Constants.*;
 
      private Map<String,Object> getSubscriptionRequest() {
          Map<String,Object> obj = new HashMap<>();
-         obj.put(RECIPIENT_CODE,"hcx-apollo-12345");
+         obj.put(RECIPIENT_CODE,"provider01.alex_med@healthflow-hcx-test.gov.eg");
          obj.put(TOPIC_CODE,"hcx-notification-001");
          obj.put(SENDER_LIST,new ArrayList<>(){
              { add("Payor1"); add("Payor2");}

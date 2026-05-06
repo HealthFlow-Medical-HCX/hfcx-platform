@@ -1,0 +1,27 @@
+server:
+  port: 8090
+  # Mock services run plain HTTP inside the test compose network. The
+  # api-gateway terminates TLS for external clients; intra-network calls
+  # don't need it for the harness.
+
+spring:
+  application:
+    name: mock-provider
+
+mock:
+  # Identity this mock claims as in §31 protocol headers. Override per-test
+  # via MOCK_PARTICIPANT_CODE.
+  participant-code: ${MOCK_PARTICIPANT_CODE:hospital-1.example.com}
+  # Path to PEM-encoded private key used for JWE decrypt. Stub today —
+  # mounted by docker-compose-test.yml from an ephemeral keypair generated
+  # at harness startup. See TODO in ProviderController.
+  rsa-key-path: ${MOCK_RSA_KEY_PATH:/keys/provider-private.pem}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

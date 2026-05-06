@@ -31,14 +31,14 @@ public class SubscriptionTest {
     @Test
     public void testSubscriptionData() {
         Subscription mockSubscription = new Subscription();
-        mockSubscription.setSubscription_id("hcx-notification-001:hcx-apollo-12345");
+        mockSubscription.setSubscription_id("hcx-notification-001:provider01.alex_med@healthflow-hcx-test.gov.eg");
         mockSubscription.setTopic_code("hcx-notification-001");
         mockSubscription.setSubscription_status(Constants.ACTIVE);
         mockSubscription.setIs_delegated(false);
         mockSubscription.setSender_code("test-sender-code");
         mockSubscription.setExpiry(123456789l);
         mockSubscription.setRecipient_code("test-recipient-code");
-        assertEquals("hcx-notification-001:hcx-apollo-12345", mockSubscription.getSubscription_id());
+        assertEquals("hcx-notification-001:provider01.alex_med@healthflow-hcx-test.gov.eg", mockSubscription.getSubscription_id());
         assertEquals("hcx-notification-001",mockSubscription.getTopic_code());
         assertEquals(Constants.ACTIVE,mockSubscription.getSubscription_status());
         assertFalse(mockSubscription.isIs_delegated());
@@ -49,9 +49,9 @@ public class SubscriptionTest {
 
     @Test
     public void testSubscriptionConstructor() {
-        Subscription mockSubscription = new Subscription("hcx-notification-001:hcx-apollo-12345","sub-request-id","hcx-notification-001",Constants.ACTIVE,
+        Subscription mockSubscription = new Subscription("hcx-notification-001:provider01.alex_med@healthflow-hcx-test.gov.eg","sub-request-id","hcx-notification-001",Constants.ACTIVE,
                 "test-sender-code","test-recipient-code",123456789l,false);
-        assertEquals("hcx-notification-001:hcx-apollo-12345", mockSubscription.getSubscription_id());
+        assertEquals("hcx-notification-001:provider01.alex_med@healthflow-hcx-test.gov.eg", mockSubscription.getSubscription_id());
         assertEquals("hcx-notification-001",mockSubscription.getTopic_code());
         assertEquals(Constants.ACTIVE,mockSubscription.getSubscription_status());
         assertFalse(mockSubscription.isIs_delegated());
