@@ -1,0 +1,37 @@
+# Maven build output
+**/target/
+
+# IDE
+**/.idea/
+**/*.iml
+**/.vscode/
+.DS_Store
+
+# Eclipse
+**/.project
+**/.classpath
+**/.cache-main
+**/.cache-tests
+**/.settings/
+
+# Gradle (in case anyone adds a gradle entry point later)
+**/.gradle/
+**/build/
+
+# Maven shade plugin
+**/dependency-reduced-pom.xml
+
+# FHIR IG build outputs (synced via fhir-ig/sync.sh; the .tgz itself
+# is committed because consumers expect a deterministic IG version
+# per release).
+**/fsh-generated/
+
+# Local secrets — never commit
+.env
+.env.*
+*.pem
+*.p12
+*.pfx
+
+# Local sonatype creds
+~/.m2/settings-security.xml
