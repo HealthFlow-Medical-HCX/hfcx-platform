@@ -1,0 +1,133 @@
+name: Security Scan (weekly + on-demand)
+
+# P1 supply-chain hardening per remediation plan §3.12. Runs Trivy filesystem
+# scan and Syft SBOM generation on the source tree. Results land in the GitHub
+# Security tab (SARIF) so vulnerabilities have a single triage surface alongside
+# the existing Dependabot alerts.
+#
+# This is intentionally separate from the per-service docker-build workflows so
+# that the scan runs on a regular cadence even when no image is being built —
+# Maven and npm transitive vulnerabilities don't wait for a release.
+#
+# Per-image Trivy scans (after `docker push`) belong in each service's
+# docker-build workflow as a follow-up PR; they require a green decision on
+# whether image signing uses Sigstore keyless OIDC or BYO KMS (Cosign).
+
+on:
+  schedule:
+    # Sunday 02:00 UTC — well outside business hours so SARIF uploads don't
+    # collide with weekday CI traffic on the Security tab.
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      severity:
+        description: "Minimum severity to fail the job (Trivy)"
+        required: false
+        default: "CRITICAL,HIGH"
+
+permissions:
+  # Required for github/codeql-action/upload-sarif to push results to the
+  # Security tab. Default permission set (`contents: read`) is otherwise unchanged.
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  trivy-fs-scan:
+    name: Trivy filesystem scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan (vulnerabilities)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs-results.sarif
+          # Severity filter — anything HIGH or above is reported. Adjust via
+          # workflow_dispatch input when triaging a noisy run.
+          severity: ${{ github.event.inputs.severity || 'CRITICAL,HIGH' }}
+          # Include all dependency categories Trivy understands (Maven, npm,
+          # Dockerfile bases, etc.). Skip secret scanning here — that's
+          # covered by GitHub's native secret scanning.
+          scanners: vuln,misconfig
+          # Don't fail the workflow on findings — we want the SARIF upload
+          # below to run regardless. Failures gate via branch protection,
+          # not via Trivy's exit code.
+          exit-code: "0"
+
+      - name: Upload Trivy SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs-results.sarif
+          category: trivy-fs
+
+      - name: Trivy filesystem scan (table format for log readability)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          severity: ${{ github.event.inputs.severity || 'CRITICAL,HIGH' }}
+          scanners: vuln
+          exit-code: "0"
+
+  sbom:
+    name: Syft SBOM generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Generate SPDX-JSON SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: hfcx-platform-sbom.spdx.json
+          upload-artifact: true
+          upload-artifact-retention: 90
+
+      - name: Generate CycloneDX SBOM (alternative format for tools that prefer it)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: hfcx-platform-sbom.cyclonedx.json
+          upload-artifact: true
+          upload-artifact-retention: 90
+
+  # P1 follow-up — image scanning. Stub-and-skip until the registry credentials
+  # are wired into this workflow. Can be enabled by removing `if: false`.
+  trivy-image-scan:
+    name: Trivy image scan (disabled — needs image registry creds)
+    runs-on: ubuntu-latest
+    if: false
+    strategy:
+      matrix:
+        image:
+          - healthflow/api-gateway:latest
+          - healthflow/hcx-api:latest
+          - healthflow/hcx-onboard:latest
+          - healthflow/hcx-pipeline-jobs:latest
+          - healthflow/hcx-scheduler-jobs:latest
+    steps:
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: sarif
+          output: trivy-image-${{ matrix.image }}.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+
+      - name: Upload Trivy image SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image-${{ matrix.image }}.sarif
+          category: trivy-image-${{ matrix.image }}
