@@ -7,8 +7,8 @@ public class SlugUtilsTest {
 
     @Test
     public void testMakeSlug() {
-        String sluggified =  SlugUtils.makeSlug("settlements@hospital.com" , "", ".", "swasth-hcx");
-        Assert.assertEquals("settlements.hospital@swasth-hcx", sluggified);
+        String sluggified =  SlugUtils.makeSlug("settlements@hospital.com" , "", ".", "healthflow-hcx-egypt");
+        Assert.assertEquals("settlements.hospital@healthflow-hcx-egypt", sluggified);
     }
 
 }

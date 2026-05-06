@@ -124,7 +124,13 @@ public class ParticipantService extends BaseController {
         // (hcx-apis re-validates as the security boundary; this is the convenience check).
         EgyptianFieldValidator.validate(participant);
         participant.put(ENDPOINT_URL, "http://testurl/v0.7");
-        participant.put(ENCRYPTION_CERT, "https://raw.githubusercontent.com/Swasth-Digital-Health-Foundation/hcx-platform/sprint-27/hcx-apis/src/test/resources/examples/x509-self-signed-certificate.pem");
+        // TODO(v1.4): HealthFlow needs to host its own self-signed test certificate
+        // at this URL before this onboarding default is exercised in any environment
+        // that actually fetches encryption_cert. The previous URL pointed to
+        // Swasth-Digital-Health-Foundation/hcx-platform on GitHub — an active
+        // runtime dependency on India infrastructure.
+        // note: swasth reference above kept intentionally to document upstream origin (Gap N4 v1.3).
+        participant.put(ENCRYPTION_CERT, "https://healthflow.gov.eg/fixtures/x509-self-signed-certificate.pem");
         participant.put(REGISTRY_STATUS, CREATED);
         if (((ArrayList<String>) participant.get(ROLES)).contains(PAYOR))
             participant.put(SCHEME_CODE, "default");

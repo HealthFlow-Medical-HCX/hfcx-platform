@@ -1,3 +1,9 @@
+<!--
+  Note: historical contextualization report (snapshot 2025-12-01). Swasth
+  references it contains are intentional descriptions of the upstream fork
+  origin at the time of writing (Gap N4 v1.3); future sweep greps should
+  leave them alone.
+-->
 # HCX Egypt Contextualization Report
 
 **Date**: 2025-12-01 15:49:55

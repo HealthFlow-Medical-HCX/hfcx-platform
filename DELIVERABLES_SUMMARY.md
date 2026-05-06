@@ -1,3 +1,8 @@
+<!--
+  Note: historical project deliverables document. Any swasth references it
+  contains are intentional descriptions of the upstream fork origin
+  (Gap N4 v1.3); future sweep greps should leave them alone.
+-->
 # HCX Egypt Project Deliverables
 
 ## Overview

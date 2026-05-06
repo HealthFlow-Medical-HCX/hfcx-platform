@@ -85,6 +85,8 @@ redirect:
 #hcx config
 hcx:
   # Default instance name per Gap 20 v1.2 — was 'swasth-hcx' (the upstream name).
+  # Note: swasth reference kept intentionally to document upstream origin
+  # (Gap N4 v1.3); future sweeps should leave this comment alone.
   instanceName: ${hcx_instance_name:healthflow-hcx-egypt}
   urls:
     notallowed: ${not_allowed_urls:http://dev-hcx.healthflow.eg/api,http://staging-hcx.healthflow.eg/api}
