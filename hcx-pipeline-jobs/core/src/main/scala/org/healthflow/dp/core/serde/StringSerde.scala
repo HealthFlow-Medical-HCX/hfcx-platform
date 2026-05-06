@@ -1,4 +1,4 @@
-package org.swasth.dp.core.serde
+package org.healthflow.dp.core.serde
 
 import java.nio.charset.StandardCharsets
 

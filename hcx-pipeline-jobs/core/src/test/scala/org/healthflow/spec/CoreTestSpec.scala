@@ -1,4 +1,4 @@
-package org.swasth.spec
+package org.healthflow.spec
 
 import java.util
 
@@ -10,12 +10,12 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.scala.OutputTag
 import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.swasth.dp.contentupdater.core.util.RestUtil
-import org.swasth.dp.core.cache.{DataCache, DedupEngine, RedisConnect}
-import org.swasth.dp.core.job.{BaseDeduplication, BaseJobConfig}
-import org.swasth.dp.core.serde._
-import org.swasth.dp.core.util.FlinkUtil
-import org.swasth.fixture.EventFixture
+import org.healthflow.dp.contentupdater.core.util.RestUtil
+import org.healthflow.dp.core.cache.{DataCache, DedupEngine, RedisConnect}
+import org.healthflow.dp.core.job.{BaseDeduplication, BaseJobConfig}
+import org.healthflow.dp.core.serde._
+import org.healthflow.dp.core.util.FlinkUtil
+import org.healthflow.fixture.EventFixture
 import redis.clients.jedis.exceptions.{JedisDataException, JedisException}
 
 class CoreTestSpec extends BaseSpec with Matchers with MockitoSugar {

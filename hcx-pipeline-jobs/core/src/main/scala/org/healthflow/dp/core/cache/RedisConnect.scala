@@ -1,8 +1,8 @@
-package org.swasth.dp.core.cache
+package org.healthflow.dp.core.cache
 
 import com.typesafe.config.Config
 import org.slf4j.LoggerFactory
-import org.swasth.dp.core.job.BaseJobConfig
+import org.healthflow.dp.core.job.BaseJobConfig
 import redis.clients.jedis.Jedis
 
 class RedisConnect(redisHost: String, redisPort: Int, jobConfig: BaseJobConfig) extends java.io.Serializable {

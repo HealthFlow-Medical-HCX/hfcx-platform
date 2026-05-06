@@ -1,10 +1,10 @@
-package org.swasth.spec
+package org.healthflow.spec
 
 import com.typesafe.config.{Config, ConfigFactory}
 import org.junit.Assert.{assertEquals, assertNotNull}
 import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.swasth.dp.core.util.{PostgresConnect, PostgresConnectionConfig}
+import org.healthflow.dp.core.util.{PostgresConnect, PostgresConnectionConfig}
 
 
 class PostgresConnectSpec extends BaseSpec with Matchers with MockitoSugar {

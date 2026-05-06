@@ -1,4 +1,4 @@
-package org.swasth.dp.search.task
+package org.healthflow.dp.search.task
 
 import java.io.File
 import java.util
@@ -7,9 +7,9 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import org.swasth.dp.core.job.FlinkKafkaConnector
-import org.swasth.dp.core.util.FlinkUtil
-import org.swasth.dp.search.functions.CompositeSearchFunction
+import org.healthflow.dp.core.job.FlinkKafkaConnector
+import org.healthflow.dp.core.util.FlinkUtil
+import org.healthflow.dp.search.functions.CompositeSearchFunction
 
 class SearchStreamTask(config: SearchConfig, kafkaConnector: FlinkKafkaConnector) {
 

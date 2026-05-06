@@ -1,4 +1,4 @@
-package org.swasth.dp.core.util
+package org.healthflow.dp.core.util
 
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper

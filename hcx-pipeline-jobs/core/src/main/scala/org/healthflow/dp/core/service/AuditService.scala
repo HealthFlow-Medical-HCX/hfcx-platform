@@ -1,8 +1,8 @@
-package org.swasth.dp.core.service
+package org.healthflow.dp.core.service
 
 import org.slf4j.LoggerFactory
-import org.swasth.dp.core.job.BaseJobConfig
-import org.swasth.dp.core.util.{Constants, ElasticSearchUtil, JSONUtil}
+import org.healthflow.dp.core.job.BaseJobConfig
+import org.healthflow.dp.core.util.{Constants, ElasticSearchUtil, JSONUtil}
 
 import java.util
 import java.util.{Calendar, Date, TimeZone}
