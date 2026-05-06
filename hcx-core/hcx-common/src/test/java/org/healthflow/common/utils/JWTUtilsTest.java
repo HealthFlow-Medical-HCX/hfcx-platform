@@ -14,6 +14,10 @@ public class JWTUtilsTest {
 
     private final JWTUtils jwtUtils = new JWTUtils();
 
+    // note: swasth URLs in the next two tests kept intentionally — they fetch a
+    // real self-signed PEM from the upstream jwe-helper repo. TODO(v1.4):
+    // HealthFlow should mirror this fixture under healthflow.gov.eg and
+    // switch the URLs.
     @Test
     public void testGetCertificateExpiry() throws Exception {
         assertNotNull(jwtUtils.getCertificateExpiry("https://raw.githubusercontent.com/Swasth-Digital-Health-Foundation/jwe-helper/main/src/test/resources/x509-self-signed-certificate.pem"));

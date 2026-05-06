@@ -1,3 +1,9 @@
+<!--
+  Note: this is an archival code-review document; the swasth/Swasth references
+  it contains are intentional historical context describing the upstream fork
+  origin and the rebrand status at the time of writing. Future N4-style sweep
+  greps should leave this file alone (Gap N4 v1.3).
+-->
 # Production-Readiness Assessment — v1.2 Corrections Patch
 
 **Applies to:** v1.1, "HealthFlow HFCX Platform — Production-Readiness Assessment", 5 May 2026

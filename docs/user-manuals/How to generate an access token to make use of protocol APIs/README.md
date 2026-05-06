@@ -4,7 +4,7 @@ For every request you are sending to HCX, needs access token.
 To generate the access token utilize the below curl command :
 
 ```postman
-curl --location 'http://${env}-hcx.swasth.app/api/${api-version}/participant/auth/token/generate' \
+curl --location 'http://${env}-hcx.healthflow.gov.eg/api/${api-version}/participant/auth/token/generate' \
 --header 'content-type: application/x-www-form-urlencoded' \
 --data-urlencode 'username=${user_id}' \
 --data-urlencode 'participant_code=${participant_code}' \
@@ -15,7 +15,7 @@ curl --location 'http://${env}-hcx.swasth.app/api/${api-version}/participant/aut
 |env|Modify the environment your using with HCX|[dev,staging]|
 |api-version|Use latest version (v0.8)|v0.8
 |user_id|User id given to the user|testuser@gmail.com|
-|participant_code|Organisation code|test-user@swasth-hcx|
+|participant_code|Organisation code|test-user@healthflow-hcx-egypt|
 |secret|secret sent via email|Opensaber@123
 
 

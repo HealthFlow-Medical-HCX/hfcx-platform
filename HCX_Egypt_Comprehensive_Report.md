@@ -1,3 +1,9 @@
+<!--
+  Note: this is a historical narrative report. Swasth/swasth references it
+  contains are intentional — they describe the upstream fork origin and the
+  rebrand status at the time the report was written. Future N4-style sweep
+  greps should leave this file alone (Gap N4 v1.3).
+-->
 # HCX Egypt Platform: Comprehensive Contextualization, Localization & Production Readiness Report
 
 **Prepared for**: HealthFlow Medical HCX Egypt  

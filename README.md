@@ -170,6 +170,7 @@ For technical support or questions:
 
 ## Acknowledgments
 
+<!-- note: swasth reference kept intentionally to document upstream origin (Gap N4 v1.3). -->
 This platform is based on the open-source HCX protocol developed by the Swasth Digital Health Foundation. We acknowledge their contribution to the healthcare interoperability ecosystem.
 
 ---

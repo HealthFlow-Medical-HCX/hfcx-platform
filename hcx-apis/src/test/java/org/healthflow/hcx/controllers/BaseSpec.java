@@ -388,6 +388,9 @@ public class BaseSpec {
         return JSONUtils.deserialize("{\"eid\":\"AUDIT\",\"edata\":{\"prevStatus\":\"Created\",\"status\":\"Inactive\"},\"ets\":1659434908868,\"mid\":\"5ee2b9e1-ded6-4b56-afa8-3380107632e0\",\"object\":{\"id\":\"097e0185-eeb1-48f1-b2b0-b68774d02c6d\",\"type\":\"participant\"},\"cdata\":{\"action\":\"/participant/delete\"}}", Map.class);
     }
 
+    // note: swasth URL kept intentionally — the test fetches a real self-signed
+    // PEM from the upstream Swasth jwe-helper repo. TODO(v1.4): HealthFlow should
+    // mirror this fixture under healthflow.gov.eg and switch the URL.
     public URL getUrl() throws MalformedURLException {
         return new URL("https://raw.githubusercontent.com/Swasth-Digital-Health-Foundation/jwe-helper/main/src/test/resources/x509-self-signed-certificate.pem");
     }

@@ -14,6 +14,8 @@
           Verify with the Sonar admin team that the 'healthflow' org slug
           actually exists and the project key matches the SonarCloud project.
           Previously: 'swasth-digital-health-foundation' (the upstream project).
+          Note: swasth reference kept intentionally to document upstream origin
+          (Gap N4 v1.3); a future cleanup pass should leave this comment alone.
         -->
         <sonar.organization>healthflow</sonar.organization>
         <sonar.projectKey>HealthFlow-Medical-HCX_hfcx-platform</sonar.projectKey>

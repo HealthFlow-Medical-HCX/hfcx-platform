@@ -1,3 +1,9 @@
+<!--
+  Note: historical phase-2 completion report. Swasth references it contains
+  are intentional descriptions of the upstream fork origin and the rebrand
+  status at the time of writing (Gap N4 v1.3); future sweep greps should
+  leave them alone.
+-->
 # HCX Egypt Platform - Phase 2 Completion Report
 
 **Project**: HCX Egypt Contextualization & Localization  

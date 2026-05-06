@@ -15,7 +15,7 @@
     <description>
         Datapipeline Flink jobs for stream processing
     </description>
-    <url>https://swasth.org/</url>
+    <url>https://healthflow.gov.eg/</url>
     <modules>
         <module>core</module>
         <module>coverage-eligibility-job</module>
