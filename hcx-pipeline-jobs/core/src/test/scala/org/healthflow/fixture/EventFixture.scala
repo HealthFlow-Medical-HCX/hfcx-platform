@@ -127,10 +127,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/coverageeligibility.check","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/coverageeligibility/on_check",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/coverageeligibility/on_check",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1.coverageeligibility/check",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1.coverageeligibility/check",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_PREAUTH_SUBMIT_EVENT: String =
@@ -154,10 +154,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/preauth/submit","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/preauth/on_submit",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/preauth/on_submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/preauth/submit",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/preauth/submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_INVALID_PREAUTH_SUBMIT_ACTION_EVENT: String =
@@ -167,10 +167,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/preauth.submit","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/preauth/on_submit",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/preauth/on_submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1.preauth/submit",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1.preauth/submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_VALID_PREAUTH_SEARCH_ACTION_EVENT: String =
@@ -180,10 +180,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/preauth/search","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/preauth/on_search",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/preauth/on_search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/preauth/search",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/preauth/search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_INVALID_PREAUTH_SEARCH_ACTION_EVENT: String =
@@ -193,10 +193,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/preauth.search","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/preauth/on_search",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/preauth/on_search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1.preauth/search",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1.preauth/search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_PAYMENTS_REQUEST_EVENT: String =
@@ -220,10 +220,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/paymentnotice/request","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/paymentnotice/on_request",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/paymentnotice/on_request",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/paymentnotice/request",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/paymentnotice/request",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_INVALID_PAYMENTS_REQUEST_ACTION_EVENT: String =
@@ -233,10 +233,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/paymentnotice.request","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/paymentnotice/on_request",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/paymentnotice/on_request",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1.paymentnotice/request",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1.paymentnotice/request",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_VALID_PAYMENTS_SEARCH_ACTION_EVENT: String =
@@ -246,10 +246,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/paymentnotice/search","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/paymentnotice/on_search",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/paymentnotice/on_search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/paymentnotice/search",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/paymentnotice/search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_INVALID_PAYMENTS_SEARCH_ACTION_EVENT: String =
@@ -259,10 +259,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/paymentnotice.search","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/paymentnotice/on_search",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/paymentnotice/on_search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1.paymentnotice/search",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1.paymentnotice/search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_CLAIMS_SUBMIT_EVENT: String =
@@ -286,10 +286,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/claim/submit","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/claim/on_submit",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/claim/on_submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/claim/submit",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/claim/submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_INVALID_CLAIMS_SUBMIT_ACTION_EVENT: String =
@@ -299,10 +299,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/claim.submit","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/claim/on_submit",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/claim/on_submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1.claim/submit",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1.claim/submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_VALID_CLAIMS_SEARCH_ACTION_EVENT: String =
@@ -312,10 +312,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/claim/search","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/claim/on_search",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/claim/on_search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/claim/search",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/claim/search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_INVALID_CLAIMS_SEARCH_ACTION_EVENT: String =
@@ -325,10 +325,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/claim.search","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/claim/on_search",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/claim/on_search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1.claim/search",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1.claim/search",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SEARCH_EVENT_VALID: String = """{"headers":{"protocol":{"enc":"A256GCM","alg":"RSA-OAEP","x-hcx-sender_code":"1-4dc3e088-a313-44ab-afa1-0222959cb75b","x-hcx-recipient_code":"hcx-gateway-code","x-hcx-correlation_id":"1e83-460a-4f0b-b016-c22d820674e1","x-hcx-api_call_id":"26b1060c-1e83-4600-9612-ea31e0ca5091","x-hcx-timestamp":"2022-01-16T09:50:23+00","x-hcx-status":"request.initiate","x-hcx-debug_flag":"Info","x-hcx-error_details":{"error.code":"bad.input","error.message":"Provider code not found","trace":""},"x-hcx-debug_details":{"error.code":"bad.input","error.message":"Provider code not found","trace":""},"x-hcx-search":{"filters":{"senders":["1-80500cdd-2dec-4d60-bd1b-8f9d83f497ff"],"receivers":["1-93f908ba-b579-453e-8b2a-56022afad275"],"entity_types":["preauth","claim"],"workflow_ids":[],"case_ids":[],"entity_status":["claims.completed","claims.rejected"]},"time_period":24},"jws_header":{"typ":"JWT","alg":"RS256"},"jwe_header":{"alg":"RSA-OAEP","enc":"A256GCM"}}},"ets":1640587993601,"mid":"200c6dac-b259-4d35-b176-370fb092d7b0","action":"/v1/hcx/search","status":"submitted"}""".stripMargin
@@ -342,10 +342,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/communication/request","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/communication/on_request",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/communication/on_request",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/communication/request",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/communication/request",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_VALID_PREDETERMINATION_REQUEST: String =
@@ -355,10 +355,10 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/communication/request","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/predetermination/on_submit",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/predetermination/on_submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/predetermination/submit",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/predetermination/submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_VALID_RETRY_REQUEST: String =
@@ -368,36 +368,36 @@ object EventFixture {
       |"x-hcx-status":"request.initiate"},"domain":{"request_amount":120000}},"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/v1/communication/request","status":"Submitted",
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/predetermination/on_submit",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/predetermination/on_submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/predetermination/submit",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/predetermination/submit",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SAMPLE_VALID_ON_SUBSCRIBE_EVENT: String =
-    """{"ets":1658775486932,"payload":{"subscription_id":"hcx-apollo:icici-67890","subscription_status":1},
-      |"x-hcx-recipient_code":"hcx-apollo-12345","mid":"018fad49-1012-4510-8456-02ed52cda58b",
-      |"action":"/notification/on_subscribe","x-hcx-sender_code":"icici-67890","status":"request.queued"}""".stripMargin
+    """{"ets":1658775486932,"payload":{"subscription_id":"provider01.alex_med:payor01.cairo_insurance@healthflow-hcx-test.gov.eg","subscription_status":1},
+      |"x-hcx-recipient_code":"provider01.alex_med@healthflow-hcx-test.gov.eg","mid":"018fad49-1012-4510-8456-02ed52cda58b",
+      |"action":"/notification/on_subscribe","x-hcx-sender_code":"payor01.cairo_insurance@healthflow-hcx-test.gov.eg","status":"request.queued"}""".stripMargin
 
   val SAMPLE_VALID_SUBSCRIBE_EVENT: String =
-    """{"ets":1658779850039,"payload":{"topic_code":"hcx-notification-001","sender_list":["icici-67890","Payor1","Payor2"]},
-      |"mid":"79cf8220-70f7-4c8c-b990-0cd6305d8bb7","action":"/notification/subscribe","x-hcx-sender_code":"hcx-apollo-12345","status":"request.queued"}""".stripMargin
+    """{"ets":1658779850039,"payload":{"topic_code":"hcx-notification-001","sender_list":["payor01.cairo_insurance@healthflow-hcx-test.gov.eg","Payor1","Payor2"]},
+      |"mid":"79cf8220-70f7-4c8c-b990-0cd6305d8bb7","action":"/notification/subscribe","x-hcx-sender_code":"provider01.alex_med@healthflow-hcx-test.gov.eg","status":"request.queued"}""".stripMargin
 
   val SAMPLE_VALID_DISPATCHER_SUBSCRIPTION_REQUEST: String =
     """{"ets":1637320447257,"mid":"761dfc11-1870-4981-b33d-16254a104a9d",
       |"action":"/notification/subscribe","status":"request.queued",
-      |"payload":{"topic_code":"hcx-notification-001","sender_list":["icici-67890"]},
+      |"payload":{"topic_code":"hcx-notification-001","sender_list":["payor01.cairo_insurance@healthflow-hcx-test.gov.eg"]},
       |"cdata":{"sender":{"participant_code":"12345","signing_cert_path":"","roles":"admin","encryption_cert":"",
-      |"endpoint_url":"http://a4a175528daf949a2af3cd141af93de2-1466580421.ap-south-1.elb.amazonaws.com:8080/v1/notification/on_subscribe",
+      |"endpoint_url":"http://mock-payer.healthflow-hcx-test.gov.eg:8080/v1/notification/on_subscribe",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"},
       |"recipient":{"participant_code":"67890","signing_cert_path":"urn:isbn:0-476-27557-4","roles":"admin","encryption_cert":"urn:isbn:0-4234",
-      |"endpoint_url":"http://a07c089412c1b46f2b49946c59267d03-2070772031.ap-south-1.elb.amazonaws.com:8080/v1/notification/subscribe",
+      |"endpoint_url":"http://mock-provider.healthflow-hcx-test.gov.eg:8080/v1/notification/subscribe",
       |"participant_name":"Test Provider","hfr_code":"0001","status":"Created"}}}""".stripMargin
 
   val SUBSCRIPTION_TOPIC: String =
-    """{"ets":1658789572751,"payload":{"topic_code":"hcx-notification-001","sender_list":["icici-67890","Payor1","Payor2"]},
-      |"mid":"9c5dbe83-a425-4498-9e92-3468f45c537e","action":"/notification/subscribe","x-hcx-sender_code":"hcx-apollo-12345","status":"request.queued"}""".stripMargin
+    """{"ets":1658789572751,"payload":{"topic_code":"hcx-notification-001","sender_list":["payor01.cairo_insurance@healthflow-hcx-test.gov.eg","Payor1","Payor2"]},
+      |"mid":"9c5dbe83-a425-4498-9e92-3468f45c537e","action":"/notification/subscribe","x-hcx-sender_code":"provider01.alex_med@healthflow-hcx-test.gov.eg","status":"request.queued"}""".stripMargin
 
   val NOTIFICATION_TOPIC: String =
-    """{"headers":{"protocol":{"recipient_type":"participant_role", "recipients":["payor"], "x-hcx-correlation_id":"0a65f30f-97ac-40cf-a335-b3aff3b6b337", "alg":"RS256", "x-hcx-notification_headers":{"recipient_type":"participant_role", "recipients":["payor"], "sender_code":"test9.aditya@swasth-hcx-dev", "timestamp":1663654695771}, "sender_code":"test9.aditya@swasth-hcx-dev", "x-hcx-status":"request.queued", "timestamp":1663654695771}}, "topic_code":"notif-participant-system-downtime", "payload":"{payload:eyJhbGciOiJSUzI1NiIsIngtaGN4LW5vdGlmaWNhdGlvbl9oZWFkZXJzIjp7InJlY2lwaWVudF90eXBlIjoicGFydGljaXBhbnRfcm9sZSIsInJlY2lwaWVudHMiOlsicGF5b3IiXSwic2VuZGVyX2NvZGUiOiJ0ZXN0OS5hZGl0eWFAc3dhc3RoLWhjeC1kZXYiLCJ0aW1lc3RhbXAiOjE2NjM2NTQ2OTU3NzF9fQ.eyJ0b3BpY19jb2RlIjoibm90aWYtcGFydGljaXBhbnQtc3lzdGVtLWRvd250aW1lIiwibWVzc2FnZSI6IklDSUNJIFN5c3RlbSB3aWxsIGJlIGZhY2luZyBkb3dudGltZSBmcm9tIDI2LTA3LTIwMjIgdG8gMjgtMDctMjAyMiBkdWUgdG8gcGxhbm5lZCBtYWludGVuYW5jZS4gU29ycnkgZm9yIGluY29udmVuaWVuY2UgYW5kIHBsZWFzZSBwbGFuIHlvdXIgb3BlcmF0aW9ucyBhY2NvcmRpbmdseS4ifQ.f7FUaWp8TTujb_bkzqVCMArCaBxVH1DDn68wK76zhpYZP2wgQBkbEyYF_WAU077GDmKigo59gXZtmMuipSe3lZrGnByXPZvVmab5EW4yNxu2Bxk24xSc06LWiU4vDburwFiyUkJXtUukEcI36jl3nCBV2wbTLVBbA3R0uQOggsyAUm7K-hqIqpfX8xQFMPHwBDWzxicqCUzJmaX30vWsWao6l4BNRCgiG-tFWPJgGdOz0w4ih6FtTqdpzHtlMbg3U_JXx3AYrzLy-jRpkygrWK-upSrc9Pb9bbmsuesEk6rK3vEIHFytI5rL65T-aBYA0udwGM_wSSHkO51RAzFlyw}", "ets":1663739190985, "notification_data":{}, "mid":"32ab2937-016f-4ca9-b77f-1c69bb3827a8", "action":"/notification/notify", "message":"ICICI System will be facing downtime from 26-07-2022 to 28-07-2022 due to planned maintenance. Sorry for inconvenience and please plan your operations accordingly."}""".stripMargin
+    """{"headers":{"protocol":{"recipient_type":"participant_role", "recipients":["payor"], "x-hcx-correlation_id":"0a65f30f-97ac-40cf-a335-b3aff3b6b337", "alg":"RS256", "x-hcx-notification_headers":{"recipient_type":"participant_role", "recipients":["payor"], "sender_code":"test09.cairo_user@healthflow-hcx-test.gov.eg", "timestamp":1663654695771}, "sender_code":"test09.cairo_user@healthflow-hcx-test.gov.eg", "x-hcx-status":"request.queued", "timestamp":1663654695771}}, "topic_code":"notif-participant-system-downtime", "payload":"{payload:eyJhbGciOiJSUzI1NiIsIngtaGN4LW5vdGlmaWNhdGlvbl9oZWFkZXJzIjp7InJlY2lwaWVudF90eXBlIjoicGFydGljaXBhbnRfcm9sZSIsInJlY2lwaWVudHMiOlsicGF5b3IiXSwic2VuZGVyX2NvZGUiOiJ0ZXN0OS5hZGl0eWFAc3dhc3RoLWhjeC1kZXYiLCJ0aW1lc3RhbXAiOjE2NjM2NTQ2OTU3NzF9fQ.eyJ0b3BpY19jb2RlIjoibm90aWYtcGFydGljaXBhbnQtc3lzdGVtLWRvd250aW1lIiwibWVzc2FnZSI6IklDSUNJIFN5c3RlbSB3aWxsIGJlIGZhY2luZyBkb3dudGltZSBmcm9tIDI2LTA3LTIwMjIgdG8gMjgtMDctMjAyMiBkdWUgdG8gcGxhbm5lZCBtYWludGVuYW5jZS4gU29ycnkgZm9yIGluY29udmVuaWVuY2UgYW5kIHBsZWFzZSBwbGFuIHlvdXIgb3BlcmF0aW9ucyBhY2NvcmRpbmdseS4ifQ.f7FUaWp8TTujb_bkzqVCMArCaBxVH1DDn68wK76zhpYZP2wgQBkbEyYF_WAU077GDmKigo59gXZtmMuipSe3lZrGnByXPZvVmab5EW4yNxu2Bxk24xSc06LWiU4vDburwFiyUkJXtUukEcI36jl3nCBV2wbTLVBbA3R0uQOggsyAUm7K-hqIqpfX8xQFMPHwBDWzxicqCUzJmaX30vWsWao6l4BNRCgiG-tFWPJgGdOz0w4ih6FtTqdpzHtlMbg3U_JXx3AYrzLy-jRpkygrWK-upSrc9Pb9bbmsuesEk6rK3vEIHFytI5rL65T-aBYA0udwGM_wSSHkO51RAzFlyw}", "ets":1663739190985, "notification_data":{}, "mid":"32ab2937-016f-4ca9-b77f-1c69bb3827a8", "action":"/notification/notify", "message":"Cairo Insurance System will be facing downtime from 26-07-2022 to 28-07-2022 due to planned maintenance. Sorry for inconvenience and please plan your operations accordingly."}""".stripMargin
 }

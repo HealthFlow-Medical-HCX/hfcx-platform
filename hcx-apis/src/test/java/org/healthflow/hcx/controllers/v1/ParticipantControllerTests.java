@@ -340,7 +340,7 @@ class ParticipantControllerTests extends BaseSpec{
         return MockResultSet.createStringMock(
                 new String[]{"applicant_email", "applicant_code", "verifier_code", "status", "createdon", "updatedon"}, //columns
                 new Object[][]{ // data
-                        {"testuser3@gmail.com", "testuser3", "verifier_code-12345", "active", 12345678, 12345678}
+                        {"testuser3@healthflow-hcx-test.gov.eg", "testuser3", "verifier_code-12345", "active", 12345678, 12345678}
                 });
     }
     @Test
