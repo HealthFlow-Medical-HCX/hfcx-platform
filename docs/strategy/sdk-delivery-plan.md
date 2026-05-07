@@ -69,7 +69,7 @@ deferral is now closed: SDK delivery is a tracked, owned, dated commitment.
 ### Java SDK (`hfcx-sdk-java`)
 
 - **Owner:** `<NAME>`
-- **Repo:** `HealthFlow-Medical-HCX/hfcx-sdk-java` (to be created)
+- **Repo:** [`HealthFlow-Medical-HCX/HFCX_SDKs_2026`](https://github.com/HealthFlow-Medical-HCX/HFCX_SDKs_2026) — single SDK monorepo (Java under `sdk-java/`, future Python under `sdk-python/`, .NET under `sdk-dotnet/`, JavaScript under `sdk-javascript/`). The original *separate `hfcx-sdk-java` repo* plan was superseded on 2026-05-06 in favour of a monorepo so cross-language parity reviews live in a single PR queue. See "What is NOT decided here" below for the rationale.
 - **Approach:** Extract `JWEHelper`, `FhirValidationService`,
   `EgyptianFieldValidator`, and the Egyptian-IG package into a new module
   `hcx-core/hcx-sdk` published to Maven Central. The platform's `hcx-apis`
@@ -79,6 +79,8 @@ deferral is now closed: SDK delivery is a tracked, owned, dated commitment.
   recipient side.
 - **Delivery target:** `<DATE — recommend ~6 weeks out>`
 - **Tracking issue:** `<LINK>`
+- **Sprint J1 status (2026-05-07):** Bootstrap PR open at [`HFCX_SDKs_2026#1`](https://github.com/HealthFlow-Medical-HCX/HFCX_SDKs_2026/pull/1). Three Maven modules build cleanly; `mvn verify` reports 7/7 unit tests + 3/3 consumer-smoke tests green; OSSRH publish wired in the `release` profile but deferred until `OSSRH_USERNAME`, `OSSRH_PASSWORD`, `GPG_PRIVATE_KEY`, and `GPG_PASSPHRASE` GitHub Secrets are set. Sprint J2 (Keycloak token client) starts in a fresh session against the SDK repo after PR #1 merges.
+- **Bootstrap-kit cleanup:** A second cleanup PR will delete `sdk-bootstrap-kit/` from this repo once Sprints J2–J6 in `HFCX_SDKs_2026` have ported the richer JWE / Egyptian validator / FHIR-validation source. The kit is left in place for now to avoid losing code that has not yet been mirrored to the new repo.
 
 ### Python SDK (`hfcx-sdk-python`)
 
@@ -175,9 +177,8 @@ tracker is chosen.
 
 - Specific API signatures per SDK beyond the high-level `HfcxClient`
   shape. SDK 1.0.0 RFCs decide those, owned by each SDK's owner.
-- Whether SDK source will live in the same monorepo or in sibling repos.
-  Recommended: sibling repos so SDK release cadence is independent of
-  platform releases. Final decision is the engineering lead's.
+- ~~Whether SDK source will live in the same monorepo or in sibling repos.~~
+  **Decided 2026-05-06:** single SDK monorepo (`HFCX_SDKs_2026`). Cross-language conformance is the primary risk for this programme; reviewing it in one PR queue beats coordinating four sibling repos. Per-language release cadence is preserved via independent Maven / PyPI / NuGet / npm version streams.
 - Versioning relationship between platform and SDKs. Recommended:
   semver-independent, with a compatibility matrix maintained per SDK.
 - License of SDK code. Recommended: Apache 2.0 to match the platform.
